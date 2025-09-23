@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site-To-Site VPNs on Palo Alto Networks Firewalls | Threat Filtering</title>
+
+
+<link rel="stylesheet" href="https://threatfiltering.com/css/style.css" />
+</head>
+<body>
+  <div class="mx-auto w-full max-w-7xl">
+    <header class="bg-white">
+      
+
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+            
+                <div class="text-2xl font-bold text-gray-800">
+                    <a href="/">
+                        <img src="/img/logo.png" width="181" height="92" alt="">
+                    </a>
+                </div>
+
+                
+                <div>
+                    <a href="/contact-us/" class="inline-block px-5 py-2 text-gray-700">Contact Us</a>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </header>
+    <main>
+      
+    
+
+    <div class="grid grid-cols-1 md:grid-cols-3 m3 md:m-12">
+        <div id="main-content" class="col-span-2 m-3 text-align-left font-sans text-base/relaxed tracking-wide md:border-r-gray-400 md:border-r-1 md:pr-12">
+                <h1 id="site-to-site-vpns-on-palo-alto-networks-firewalls">Site-To-Site VPNs on Palo Alto Networks Firewalls</h1>
+<img src="IPSec-VPN.png" alt="" class="img-fluid py-4"><p>Palo Alto Networks firewalls provide site-to-site and remote access VPN functionality. This article covers overview and configuration of IPSec site-to-site tunnels which are compatible with equipment from other vendors.</p>
+<p>IPSec tunnel is established between two gateways over IP network and is transparent to end devices communicating over this tunnel. Transport network (usually Internet) between gateways is responsible for packet delivery from one gateway to another. Routers on the Internet cannot see original packet content including endpoints’ IP addresses, as packets are encrypted and new IP headers are being added by gateways.</p>
+<p>Generally, it is relatively simple to establish a tunnel when you control devices on both sides of the tunnel. However, there might be cases in which you need to setup tunnel to a partner which can be using firewall from different vendor.</p>
+<h2 id="ipsec-overview">IPSec Overview</h2>
+<blockquote>
+<p><strong>What parameters are required to setup an IPSec VPN tunnel?</strong></p>
+</blockquote>
+<p>IPSec relies on Security Associations to be established, which are agreed set of security attributes that both sides of a tunnel will be using to secure the traffic. Attributes are cryptographic algorithms and keys. Each Security Association is unidirectional and has an ID.</p>
+<p>Protocol that is responsible for setting up these SAs is Internet Key Exchange (IKE). It’s operation in relation to setting up IKE SA is referred to as Phase 1. There are 2 versions, which must match between gateways – IKEv1 and IKEv2. Palo Alto Network supports both versions of protocol. IKEv2 is more recent and has many improvements over the first version, so it should be preferred if both sides support it.</p>
+<p>Once the IKE version is known, authentication type must be agreed on. Options are pre-shared keys (PSK) or certificates. In my personal experience, majority of tunnels are using pre-shared keys. They are simpler to configure, and in many cases are the only option if the tunnel is established with a partner or a client.</p>
+<p>The next set of parameters is required for IKE Phase 1 SA (or IKE SA) setup:</p>
+<ul>
+<li>Public-key based encryption for symmetrical shared key generation. Options are Diffie-Hellman (DH) Groups 1, 2, 5, 14, 19 and 20</li>
+<li>Authentication (SHA1, SHA256, SHA384, SHA512 and MD5)</li>
+<li>Encryption (3DES, AES-128-CBC, AES-192-CBC, AES-256-CBC and DES)</li>
+<li>Lifetime</li>
+</ul>
+<p>Similar parameters must match for Phase 2 (or IPSec SA):</p>
+<ul>
+<li>Protocol – commonly used Encapsulating Security Payload (ESP) or less common due to lack of encryption capability – Authentication Header (AH)</li>
+<li>Public-key based encryption – Perfect Forward Secrecy (PFS), creates independent key for Phase 2. Options are Diffie-Hellman (DH) Group 1, 2, 5, 14, 19 and 20</li>
+<li>Authentication (SHA1, SHA256, SHA384, SHA512 and MD5)</li>
+<li>Encryption (3DES, AES-128-CBC, AES-192-CBC, AES-256-CBC, DES and additional algorithms – AES-128-CCM, AES-128-GCM, AES-256-GCM)</li>
+<li>Lifetime</li>
+</ul>
+<p>And the final piece of the information is what traffic should be encrypted and whether tunnel to be setup is policy or route-based.</p>
+<blockquote>
+<p><strong>What is the difference between route- and policy-based IPSec VPN tunnels?</strong></p>
+</blockquote>
+<p>Route-based tunnel is usually represented as Layer 3 point-to-point interface between two gateways. Gateways encrypt all the packets that use other end of the tunnel as next hop after route lookup. Dynamic routing can also be set-up on this point-to-point interface.</p>
+<p>Policy-based tunnels use access-lists to identify what traffic needs to be encrypted. Gateways must agree on list of source/destination network sets called Proxy IDs.</p>
+<p>Palo Alto firewalls require use of IP routes and tunnel interfaces for both route- and policy-based tunnels, so if both sides support use of IP numbered L3 tunnel interface route-based option should be used.</p>
+<h2 id="configuration-elements">Configuration Elements</h2>
+<p>So once all configuration parameters are known and agreed upon, the following configuration elements need to be configured:</p>
+<ul>
+<li>IKE Crypto Profile</li>
+<li>IPSec Crypto Profile</li>
+<li>IKE Gateway</li>
+<li>Tunnel Security Zone</li>
+<li>Tunnel Interface with Static (or Dynamic) route</li>
+<li>IPSec Tunnel</li>
+</ul>
+<p>The following diagram display how elements interact with each other.</p>
+<img src="image.png" alt="" class="img-fluid py-4"><h2 id="step-by-step-vpn-configuration-example">Step-By-Step VPN Configuration Example</h2>
+<p>The following sections demonstrate how to perform configuration using WebGUI and CLI for simple topology shown in the diagram below. Configuration is the mirrored on both firewalls, so only single firewall configuration is shown.</p>
+<img src="image-1.png" alt="" class="img-fluid py-4"><h3 id="step-1-ike-crypto-profile">Step 1. IKE Crypto Profile</h3>
+<p><strong>Web GUI</strong></p>
+<p>Navigate to the following menu: <code>Network &gt; Network Profiles &gt; IKE Crypto &gt; Add</code>.</p>
+<img src="image-2.png" alt="" class="img-fluid py-4"><p><strong>CLI</strong></p>
+<pre tabindex="0"><code>set network ike crypto-profiles ike-crypto-profiles IKE-CRYPTO-PROFILE-1 encryption aes-128-cbc
+set network ike crypto-profiles ike-crypto-profiles IKE-CRYPTO-PROFILE-1 hash sha256 
+set network ike crypto-profiles ike-crypto-profiles IKE-CRYPTO-PROFILE-1 dh-group group2 
+set network ike crypto-profiles ike-crypto-profiles IKE-CRYPTO-PROFILE-1 lifetime hours 8 
+</code></pre><h3 id="step-2-ipsec-crypto-profile">Step 2. IPSec Crypto Profile</h3>
+<p><strong>Web GUI</strong></p>
+<p>Navigate to the following menu: <code>Network &gt; Network Profiles &gt; IPSec Crypto &gt; Add</code>.</p>
+<img src="image-3.png" alt="" class="img-fluid py-4"><p><strong>CLI</strong></p>
+<pre tabindex="0"><code>set network ike crypto-profiles ipsec-crypto-profiles IPSEC-PROFILE-1 esp encryption aes-128-cbc
+set network ike crypto-profiles ipsec-crypto-profiles IPSEC-PROFILE-1 esp authentication sha256
+set network ike crypto-profiles ipsec-crypto-profiles IPSEC-PROFILE-1 dh-group group2
+set network ike crypto-profiles ipsec-crypto-profiles IPSEC-PROFILE-1 lifetime hours 1
+</code></pre><h3 id="step-3-ike-gateway">Step 3. IKE Gateway</h3>
+<p><strong>Web GUI</strong></p>
+<p>Navigate to the following menu: <code>Network &gt; Network Profiles &gt; IKE Gateways &gt; Add</code>. Enter gateway name, IP address and pre-shared key. On Advanced Options tab select IKE Crypto Profile created earlier.</p>
+<img src="image-4.png" alt="" class="img-fluid py-4"><img src="image-5.png" alt="" class="img-fluid py-4"><p><strong>CLI</strong></p>
+<pre tabindex="0"><code>set network ike gateway IKE-GW-2 peer-address ip 10.1.1.2
+set network ike gateway IKE-GW-2 authentication pre-shared-key key 
+set network ike gateway IKE-GW-2 local-address ip 10.1.1.1/30
+set network ike gateway IKE-GW-2 local-address interface ethernet1/1.100
+set network ike gateway IKE-GW-2 protocol-common nat-traversal enable no
+set network ike gateway IKE-GW-2 protocol-common fragmentation enable no
+set network ike gateway IKE-GW-2 protocol ikev1 dpd enable yes
+set network ike gateway IKE-GW-2 protocol ikev1 ike-crypto-profile IKE-CRYPTO-PROFILE-1
+</code></pre><h3 id="step-4-tunnel-security-zone">Step 4. Tunnel Security Zone</h3>
+<p><strong>Web GUI</strong></p>
+<p>Navigate to the following menu: <code>Zones &gt; Add</code>. Type-in zone name and select Layer3 as type.</p>
+<img src="image-6.png" alt="" class="img-fluid py-4"><p><strong>CLI</strong></p>
+<pre tabindex="0"><code>set zone PARTNER-VPN network layer3
+</code></pre><h3 id="step-5-tunnel-interface-with-static-or-dynamic-route">Step 5. Tunnel Interface with Static (or Dynamic) route</h3>
+<p><strong>Web GUI</strong></p>
+<p>Navigate to the following menu: Interfaces. Click on Tunnel tab and press Add. Type-in tunnel interface number, “default” as virtual router and security zone created in the previous step. Configure IP address on IPv4 tab.</p>
+<img src="image-7.png" alt="" class="img-fluid py-4"><img src="image-8.png" alt="" class="img-fluid py-4"><p>To configure static route, navigate to <code>Network &gt; Virtual Routers</code>, and then click on Default router, as shown in the screenshot below. Click on Static Routes tab, and press Add button.</p>
+<img src="image-9.png" alt="" class="img-fluid py-4"><p>Fill-in static route name, destination. As interface specify tunnel.100 with next hop of 192.168.1.2.</p>
+<img src="image-10.png" alt="" class="img-fluid py-4"><p><strong>CLI</strong></p>
+<pre tabindex="0"><code>set network interface tunnel units tunnel.100 comment &#34;To Partner B&#34; 
+set network interface tunnel units tunnel.100 ip 192.168.1.1/30
+set network virtual-router default interface [ ethernet1/1.100 tunnel.100 ]
+set zone PARTNER-VPN network layer3 tunnel.100
+set network virtual-router default routing-table ip static-route 172.16.2.0-24 path-monitor enable no
+set network virtual-router default routing-table ip static-route 172.16.2.0-24 path-monitor failure-condition any
+set network virtual-router default routing-table ip static-route 172.16.2.0-24 path-monitor hold-time 2
+set network virtual-router default routing-table ip static-route 172.16.2.0-24 nexthop ip-address 192.168.1.2
+set network virtual-router default routing-table ip static-route 172.16.2.0-24 bfd profile None
+set network virtual-router default routing-table ip static-route 172.16.2.0-24 interface tunnel.100
+set network virtual-router default routing-table ip static-route 172.16.2.0-24 metric 10
+set network virtual-router default routing-table ip static-route 172.16.2.0-24 destination 172.16.2.0/24
+set network virtual-router default routing-table ip static-route 172.16.2.0-24 route-table unicast
+</code></pre><h3 id="step-6-ipsec-tunnel">Step 6. IPSec Tunnel**</h3>
+<p><strong>Web GUI</strong></p>
+<p>Navigate to the following menu: <code>Network &gt; IPSec Tunnels &gt; Add</code>. Type-in tunnel name, select tunnel interface, IKE Gateway and IPSec Crypto Profile created in earlier steps.</p>
+<img src="image-11.png" alt="" class="img-fluid py-4"><p><strong>CLI</strong></p>
+<pre tabindex="0"><code>set network tunnel ipsec IPSEC-TUNNEL-1 auto-key ike-gateway IKE-GW-2 
+set network tunnel ipsec IPSEC-TUNNEL-1 auto-key ipsec-crypto-profile IPSEC-PROFILE-1
+set network tunnel ipsec IPSEC-TUNNEL-1 tunnel-monitor enable no
+set network tunnel ipsec IPSEC-TUNNEL-1 tunnel-interface tunnel.100
+</code></pre><h3 id="step-7-configure-associated-firewall-rules-and-management-profiles">Step 7. Configure associated firewall rules and management profiles**</h3>
+<p>As part of the testing we will try to ping IP address of peer’s side of the tunnel. To allow this traffic that is terminated on the firewall itself, set-up new management profile on the tunnel interface.</p>
+<p>For LAN-to-LAN traffic, two firewall rules will be required on each firewall:</p>
+<ul>
+<li>Trust to PARTNER-VPN</li>
+<li>PARTNER-VPN to Trust</li>
+</ul>
+<h2 id="testing-and-troubleshooting">Testing and troubleshooting</h2>
+<p>To bring the tunnel up, some traffic needs to be generated. Before that the status of the tunnel will be red as shown in the next screenshot. To check it navigate to <code>Network &gt; IPSec Tunnel</code> and then click on Tunnel Info in the Status column.</p>
+<img src="image-12.png" alt="" class="img-fluid py-4"><p>As the interface is numbered, ping IP address of the peer’s tunnel interface.</p>
+<pre tabindex="0"><code>admin@PA&gt; ping source 192.168.1.1 host 192.168.1.2
+PING 192.168.1.2 (192.168.1.2) from 192.168.1.1 : 56(84) bytes of data.
+64 bytes from 192.168.1.2: icmp_seq=2 ttl=64 time=19.9 ms
+64 bytes from 192.168.1.2: icmp_seq=3 ttl=64 time=19.2 ms
+64 bytes from 192.168.1.2: icmp_seq=4 ttl=64 time=18.0 ms
+64 bytes from 192.168.1.2: icmp_seq=5 ttl=64 time=7.25 ms
+64 bytes from 192.168.1.2: icmp_seq=6 ttl=64 time=6.63 ms
+64 bytes from 192.168.1.2: icmp_seq=7 ttl=64 time=15.1 ms
+64 bytes from 192.168.1.2: icmp_seq=8 ttl=64 time=13.6 ms
+64 bytes from 192.168.1.2: icmp_seq=9 ttl=64 time=11.9 ms
+64 bytes from 192.168.1.2: icmp_seq=10 ttl=64 time=10.5 ms
+64 bytes from 192.168.1.2: icmp_seq=11 ttl=64 time=8.87 ms
+64 bytes from 192.168.1.2: icmp_seq=12 ttl=64 time=7.74 ms
+64 bytes from 192.168.1.2: icmp_seq=13 ttl=64 time=16.1 ms
+64 bytes from 192.168.1.2: icmp_seq=14 ttl=64 time=14.4 ms
+64 bytes from 192.168.1.2: icmp_seq=15 ttl=64 time=13.2 ms
+64 bytes from 192.168.1.2: icmp_seq=16 ttl=64 time=12.8 ms
+ ^C
+ --- 192.168.1.2 ping statistics ---
+ 16 packets transmitted, 15 received, 6% packet loss, time 15016ms
+ rtt min/avg/max/mdev = 6.636/13.051/19.993/4.133 ms
+</code></pre><p>Now the tunnel status has changed to green and pop-up window display tunnel statistics, such as number of packets sent and received.</p>
+<img src="image-13.png" alt="" class="img-fluid py-4"><p>System log (<code>Monitor &gt; Logs &gt; System</code>) is populated with events as tunnel is getting established. To filter out VPN-only events filter the output using the filter shown in the next screenshot <code>( subtype eq vpn )</code>.</p>
+<img src="image-14.png" alt="" class="img-fluid py-4"><p>To monitor and troubleshoot tunnels using CLI the following command:</p>
+<pre tabindex="0"><code>tail follow yes mp-log ikemgr.log
+</code></pre><p>It display live debug messages which are stored in ikemgr.log.</p>
+<pre tabindex="0"><code>admin@PA&gt; tail follow yes mp-log ikemgr.log 
+2019-04-22 04:42:37.231 -0700  [INFO]: {    2:    1}: IPsec-SA request for 10.1.1.2 queued since no phase1 found
+2019-04-22 04:42:37.231 -0700  [PNTF]: {    2:     }: ====&gt; PHASE-1 NEGOTIATION STARTED AS INITIATOR, MAIN MODE &lt;====                                                       ====&gt; Initiated SA: 10.1.1.1[500]-10.1.1.2[500] cookie:080a6143f9e82bf6:0000000000000000 &lt;==== 2019-04-22 04:42:37.260 -0700  [INFO]: {    2:     }: received Vendor ID: DPD 2019-04-22 04:42:37.260 -0700  [INFO]: {    2:     }: received Vendor ID: PANOS - the new generation of firewall 2019-04-22 04:42:37.281 -0700  [PNTF]: {    2:     }: ====&gt; PHASE-1 NEGOTIATION SUCCEEDED AS INITIATOR, MAIN MODE &lt;====                                                       ====&gt; Established SA: 10.1.1.1[500]-10.1.1.2[500] cookie:080a6143f9e82bf6:0dbe13611ce17303 lifetime 28800 Sec &lt;==== 2019-04-22 04:42:37.281 -0700  [PNTF]: {    2:    1}: ====&gt; PHASE-2 NEGOTIATION STARTED AS INITIATOR, (QUICK MODE) &lt;====                                                       ====&gt; Initiated SA: 10.1.1.1[500]-10.1.1.2[500] message id:0x32339F97 &lt;==== 2019-04-22 04:42:37.290 -0700  [PNTF]: {     :    1}: ====&gt; PHASE-2 NEGOTIATION SUCCEEDED AS INITIATOR, (QUICK MODE) &lt;====                                                       ====&gt; Established SA: 10.1.1.1[500]-10.1.1.2[500] message id:0x32339F97, SPI:0xA5ED690D/0xB3A8ACFB &lt;==== 2019-04-22 04:42:37.290 -0700  [INFO]: {    2:    1}: SADB_UPDATE proto=255 10.1.1.2[500]=&gt;10.1.1.1[500] ESP tunl spi 0xA5ED690D auth=SHA256 enc=AES128/16 lifetime soft 3600/0 hard 3600/0
+2019-04-22 04:42:37.290 -0700  [INFO]: {    2:    1}: SADB_ADD proto=255 10.1.1.1[500]=&gt;10.1.1.2[500] ESP tunl spi 0xB3A8ACFB auth=SHA256 enc=AES128/16 lifetime soft 3122/0 hard 3600/0
+2019-04-22 04:42:37.290 -0700  [INFO]: {    2:    1}: IPsec-SA established: ESP/Tunnel 10.1.1.2[500]-&gt;10.1.1.1[500] spi=2783799565(0xa5ed690d)
+2019-04-22 04:42:37.290 -0700  [PNTF]: {     :    1}: ====&gt; IPSEC KEY INSTALLATION SUCCEEDED &lt;====                                                       ====&gt; Installed SA: 10.1.1.1[500]-10.1.1.2[500] SPI:0xA5ED690D/0xB3A8ACFB lifetime 3600 Sec lifesize unlimited &lt;====
+</code></pre><p>The next step of the testing will be sending traffic over tunnel from test Windows machines. The commands in the screenshot below are launched from a Windows 7 workstation with IP address of 172.16.1.5 (on the left side of the lab diagram).</p>
+<p>Traceroute shows that the packets are indeed flowing over tunnel and transport network (10.1.1.0/30) hops are not visible in the output.</p>
+<img src="image-15.png" alt="" class="img-fluid py-4">
+
+                
+                <div class="mt-9">
+                    
+                    
+                    <nav class="inline-grid grid-cols-4 space-x-2.5 w-full justify-center pt-5">
+
+                        
+                        <a class="text-center col-start-2  py-2 px-3 rounded font-medium select-none border text-gray-900  bg-white transition-colors hover:border-gray-400 hover:bg-gray-700 hover:text-white "
+                            href="/packet-flow-and-order-of-operations-in-pan-os/">
+                            &lt; Prev
+                        </a>
+                        
+
+                        
+                        <a class="text-center col-start-3 py-2 px-3 rounded font-medium select-none border text-gray-900  bg-white dtransition-colors hover:border-gray-400 hover:bg-gray-700 hover:text-white "
+                            href="/install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls/">
+                            Next > </a>
+                        
+                    </nav>
+
+                </div>
+                
+
+
+
+        </div>
+        
+        <div class="mt-6 ml-6">
+
+                <h2 class="mb-5">Categories:</h2>
+                <ul class="text-cyan-500">
+                    
+                        <li class="mb-1"><a href="/category/cisco/">Cisco</a></li>
+                    
+                        <li class="mb-1"><a href="/category/cisco-asa/">Cisco ASA</a></li>
+                    
+                        <li class="mb-1"><a href="/category/palo-alto/">Palo Alto</a></li>
+                    
+                        <li class="mb-1"><a href="/category/pki/">PKI</a></li>
+                    
+                </ul>
+                <br>
+
+                
+                <br>
+                
+                <h2 class="mb-5">Recent posts:</h2>
+                <ul class="text-cyan-500">
+                    
+                        <li><a class="mb-1" href="/cisco-firewall-models-and-performance/">Cisco Firewall Models and Performance</a></li>
+                    
+                        <li><a class="mb-1" href="/cisco-zone-based-firewall-configuration-step-by-step-part-2/">Cisco Zone Based Firewall Configuration Step By Step Part 2</a></li>
+                    
+                        <li><a class="mb-1" href="/cisco-zone-based-firewall-configuration-step-by-step-part-1/">Cisco Zone Based Firewall Configuration Step By Step Part 1</a></li>
+                    
+                        <li><a class="mb-1" href="/install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls/">Install SSL certificate on Palo Alto Networks or Cisco ASA Firewalls</a></li>
+                    
+                        <li><a class="mb-1" href="/site-to-site-vpns-on-palo-alto-network-firewalls/">Site-To-Site VPNs on Palo Alto Networks Firewalls</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    </main>
+    <footer class="pt-24 text-center text-sm">
+          
+            <a href="/privacy-policy" style="text-decoration:none;" class="link-dark">Privacy Policy</a> - 
+            <a href="/terms-and-conditions" style="text-decoration:none;" class="link-dark">Terms and Conditions</a></p>
+            <p class="text-dark">Copyright &copy; 2025 threatfiltering.net</p>
+
+    </footer>
+  </div>
+</body>
+</html>

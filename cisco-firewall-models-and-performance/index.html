@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cisco Firewall Models and Performance | Threat Filtering</title>
+
+
+<link rel="stylesheet" href="https://threatfiltering.com/css/style.css" />
+</head>
+<body>
+  <div class="mx-auto w-full max-w-7xl">
+    <header class="bg-white">
+      
+
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+            
+                <div class="text-2xl font-bold text-gray-800">
+                    <a href="/">
+                        <img src="/img/logo.png" width="181" height="92" alt="">
+                    </a>
+                </div>
+
+                
+                <div>
+                    <a href="/contact-us/" class="inline-block px-5 py-2 text-gray-700">Contact Us</a>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </header>
+    <main>
+      
+    
+
+    <div class="grid grid-cols-1 md:grid-cols-3 m3 md:m-12">
+        <div id="main-content" class="col-span-2 m-3 text-align-left font-sans text-base/relaxed tracking-wide md:border-r-gray-400 md:border-r-1 md:pr-12">
+                <p>This article is about Cisco Firewalls. It aggregates available information from datasheets published by Cisco.</p>
+<h2 id="cisco-asa">Cisco ASA</h2>
+<p>ASA or Adaptive Security Appliance is one of the most commonly deployed firewalls and successor of Cisco PIX, which was Cisco’s first firewall available with acquisition of Network Translation in 1995.</p>
+<p>Original ASA line consisted of 6 models with the following parameters, as published on Cisco website. All of the models below are well past End-Of-Sale date.</p>
+<p>IPS performance numbers can be achieved only using Advanced Inspection and Prevention or AIP hardware module.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Form-factor</th>
+          <th style="text-align: left">Firewall Mbps</th>
+          <th style="text-align: left">FW + IPS Mbps</th>
+          <th style="text-align: left">VPN AES Mbps</th>
+          <th style="text-align: left">Sessions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">5505</td>
+          <td style="text-align: left">Desktop</td>
+          <td style="text-align: left">150</td>
+          <td style="text-align: left">75</td>
+          <td style="text-align: left">100</td>
+          <td style="text-align: left">25,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5510</td>
+          <td style="text-align: left">1RU</td>
+          <td style="text-align: left">300</td>
+          <td style="text-align: left">300</td>
+          <td style="text-align: left">170</td>
+          <td style="text-align: left">130,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5520</td>
+          <td style="text-align: left">1RU</td>
+          <td style="text-align: left">450</td>
+          <td style="text-align: left">450</td>
+          <td style="text-align: left">225</td>
+          <td style="text-align: left">280,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5540</td>
+          <td style="text-align: left">1RU</td>
+          <td style="text-align: left">650</td>
+          <td style="text-align: left">650</td>
+          <td style="text-align: left">325</td>
+          <td style="text-align: left">400,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5550</td>
+          <td style="text-align: left">1RU</td>
+          <td style="text-align: left">1,200</td>
+          <td style="text-align: left">N/A</td>
+          <td style="text-align: left">425</td>
+          <td style="text-align: left">650,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5580-20</td>
+          <td style="text-align: left">4RU</td>
+          <td style="text-align: left">5,000</td>
+          <td style="text-align: left">N/A</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">1,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5580-40</td>
+          <td style="text-align: left">4RU</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">N/A</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">2,000,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 1. Legacy ASA Performance</p>
+<p>More information is available on official Cisco <a href="https://www.cisco.com/c/en/us/products/security/asa-5500-series-next-generation-firewalls/data_sheet_c78-345385.html">website</a>.</p>
+<p>The next generation of Cisco ASA line introduced Next-Gen Features, such as antivirus, file blocking, antispam, URL blocking and content control with new hardware security module called Content Security and Control or CSC Module for ASA 5520/40/80. New ASA 5525-X, 5545-X and 5555-X models had these features available without any additional hardware.</p>
+<p>New X models also had significantly higher throughput. Below are published specs for the newer models:</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Firewall (UDP-based) Mbps</th>
+          <th style="text-align: left">Firewall (Multi-protocol) Mbps</th>
+          <th style="text-align: left">FW+IPS  Mbps</th>
+          <th style="text-align: left">Next-Gen Throughput Mbps</th>
+          <th style="text-align: left">VPN AES Mbps</th>
+          <th style="text-align: left">Sessions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">5520</td>
+          <td style="text-align: left">450</td>
+          <td style="text-align: left">*</td>
+          <td style="text-align: left">450</td>
+          <td style="text-align: left">**</td>
+          <td style="text-align: left">225</td>
+          <td style="text-align: left">280,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5525-X</td>
+          <td style="text-align: left">2,000</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">600</td>
+          <td style="text-align: left">650</td>
+          <td style="text-align: left">300</td>
+          <td style="text-align: left">500,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5540</td>
+          <td style="text-align: left">650</td>
+          <td style="text-align: left">*</td>
+          <td style="text-align: left">650</td>
+          <td style="text-align: left">**</td>
+          <td style="text-align: left">325</td>
+          <td style="text-align: left">400,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5545-X</td>
+          <td style="text-align: left">3,000</td>
+          <td style="text-align: left">1,500</td>
+          <td style="text-align: left">900</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">400</td>
+          <td style="text-align: left">750,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5550</td>
+          <td style="text-align: left">1,200</td>
+          <td style="text-align: left">*</td>
+          <td style="text-align: left">N/A</td>
+          <td style="text-align: left">**</td>
+          <td style="text-align: left">425</td>
+          <td style="text-align: left">650,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5555-X</td>
+          <td style="text-align: left">4,000</td>
+          <td style="text-align: left">2,000</td>
+          <td style="text-align: left">1,300</td>
+          <td style="text-align: left">1,400</td>
+          <td style="text-align: left">700</td>
+          <td style="text-align: left">1,000,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 2. ASA Gen2 Performance</p>
+<p><code>*</code> – Performance data is not published
+<code>**</code> – CSC module is responsible for Next-Gen features on these models. Performance data is not published</p>
+<p>Cisco also made available multi-protocol firewall throughput numbers for the new platforms based on multiple TCP-based applications, such as HTTP, SMTP and FTP. The table above shows values for both maximum achievable and closer to real life multi-protocol performance.</p>
+<p>Current product <a href="https://www.cisco.com/c/en/us/products/security/asa-firepower-services/index.html">line</a> includes Next-Gen features, such as Sourcefire Threat and Advance Malware Protection. These technologies became available with Cisco’s acquisition of Sourcefire in 2013. Firewalls model name has “with FirePOWER Services” added to the 55xx series as per table below.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Form-factor</th>
+          <th style="text-align: left">Firewall (Multi-protocol) Mbps</th>
+          <th style="text-align: left">FW + AVC  Mbps</th>
+          <th style="text-align: left">FW + AVC + NGIPS  Mbps</th>
+          <th style="text-align: left">FW + AVC + NGIPS 440 byte Mbps</th>
+          <th style="text-align: left">VPN AES  Mbps</th>
+          <th style="text-align: left">Sessions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">5506-X 5506W-X 5506H-X</td>
+          <td style="text-align: left">Desk W - is for wireless H - is ruggedized</td>
+          <td style="text-align: left">300</td>
+          <td style="text-align: left">250</td>
+          <td style="text-align: left">125</td>
+          <td style="text-align: left">90</td>
+          <td style="text-align: left">100</td>
+          <td style="text-align: left">50,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5508-X</td>
+          <td style="text-align: left">1RU</td>
+          <td style="text-align: left">500</td>
+          <td style="text-align: left">450</td>
+          <td style="text-align: left">250</td>
+          <td style="text-align: left">180</td>
+          <td style="text-align: left">175</td>
+          <td style="text-align: left">100,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5516-X</td>
+          <td style="text-align: left">1RU</td>
+          <td style="text-align: left">900</td>
+          <td style="text-align: left">850</td>
+          <td style="text-align: left">450</td>
+          <td style="text-align: left">300</td>
+          <td style="text-align: left">250</td>
+          <td style="text-align: left">250,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5525-X</td>
+          <td style="text-align: left">1RU</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">650</td>
+          <td style="text-align: left">375</td>
+          <td style="text-align: left">300</td>
+          <td style="text-align: left">500,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5545-X</td>
+          <td style="text-align: left">1RU</td>
+          <td style="text-align: left">1,500</td>
+          <td style="text-align: left">1,500</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">575</td>
+          <td style="text-align: left">400</td>
+          <td style="text-align: left">750,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">5555-X</td>
+          <td style="text-align: left">1RU</td>
+          <td style="text-align: left">2,000</td>
+          <td style="text-align: left">1,750</td>
+          <td style="text-align: left">1,250</td>
+          <td style="text-align: left">725</td>
+          <td style="text-align: left">700</td>
+          <td style="text-align: left">1,000,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 3. ASA Current Gen Performance</p>
+<p>The current models can either run:</p>
+<ul>
+<li>ASA software with FirePOWER services as a software module managed by FirePOWER Management Center.</li>
+<li>FTD or unified image with the single control plane. Traditional ASA configuration with CLI will not be available to perform changes.</li>
+</ul>
+<p>The screenshot of the software download page shows options for ASA5506-X as an example with the options marked with red dot are required to image ASA with FirePOWER services. Blue dot option is the unified image.</p>
+<img src="image-5.png" alt="" class="img-fluid py-4"><h2 id="cisco-firepower-series">Cisco Firepower Series</h2>
+<p>Firepower devices include 4 series of the products:</p>
+<ul>
+<li>Firepower 1000 series (<a href="https://www.cisco.com/c/en/us/products/collateral/security/firepower-1000-series/datasheet-c78-742469.html">link</a>)</li>
+<li>Firepower 2100 series (<a href="https://www.cisco.com/c/en/us/products/collateral/security/firepower-2100-series/datasheet-c78-742473.html">link</a>)</li>
+<li>Firepower 4100 series (<a href="https://www.cisco.com/c/en/us/products/collateral/security/firepower-4100-series/datasheet-c78-742474.html">41×0</a> and <a href="https://www.cisco.com/c/en/us/products/collateral/security/firepower-4100-series/datasheet-c78-742470.html">41×5</a>)</li>
+<li>Firepower 9000 series (<a href="https://www.cisco.com/c/en/us/products/collateral/security/firepower-9000-series/datasheet-c78-742476.html">SM-24, SM-36, SM-44</a> and <a href="https://www.cisco.com/c/en/us/products/collateral/security/firepower-9000-series/datasheet-c78-742471.html">SM-40, SM-48, SM-56</a>)</li>
+</ul>
+<p>All Firepower devices can run FTD image and either support or will support ASA image.</p>
+<p>Firepower 1000 series is the most recent addition to the family and has impressive performance numbers, especially with NGIPS and AVC features enabled. At the time of writing Firepower 1000 supports only FTD image. Local management via Firepower Device Manager or centralized via Management Center options are available.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Form-factor</th>
+          <th style="text-align: left">Firewall (Multi-protocol) Mbps</th>
+          <th style="text-align: left">FW+AVC 1024 byte Mbps</th>
+          <th style="text-align: left">FW + AVC + NGIPS 1024 byte Mbps</th>
+          <th style="text-align: left">VPN AES  Mbps</th>
+          <th style="text-align: left">TLS   Mbps</th>
+          <th style="text-align: left">Sessions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">1010</td>
+          <td style="text-align: left">Desk</td>
+          <td style="text-align: left">650</td>
+          <td style="text-align: left">650</td>
+          <td style="text-align: left">650</td>
+          <td style="text-align: left">300</td>
+          <td style="text-align: left">150</td>
+          <td style="text-align: left">100,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">1120</td>
+          <td style="text-align: left">1RU</td>
+          <td style="text-align: left">1,500</td>
+          <td style="text-align: left">1,500</td>
+          <td style="text-align: left">1,500</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">700</td>
+          <td style="text-align: left">200,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">1140</td>
+          <td style="text-align: left">1RU</td>
+          <td style="text-align: left">2,200</td>
+          <td style="text-align: left">2,200</td>
+          <td style="text-align: left">2,200</td>
+          <td style="text-align: left">1,200</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">400,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 4. FTD 1000 Series Performance</p>
+<p>Firepower 2100 series consists of 4 models and has dual multi-core CPU architecture. FTD performance is as per the table below. All devices are 1RU.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Firewall Max (UDP) Mbps</th>
+          <th style="text-align: left">FW+AVC 1024 byte Mbps</th>
+          <th style="text-align: left">FW + AVC + NGIPS 1024 byte Mbps</th>
+          <th style="text-align: left">VPN AES  Mbps</th>
+          <th style="text-align: left">TLS  Mbps</th>
+          <th style="text-align: left">Sessions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">2110</td>
+          <td style="text-align: left">3,000</td>
+          <td style="text-align: left">2,300</td>
+          <td style="text-align: left">2,300</td>
+          <td style="text-align: left">800</td>
+          <td style="text-align: left">365</td>
+          <td style="text-align: left">1,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">2120</td>
+          <td style="text-align: left">6,000</td>
+          <td style="text-align: left">3,000</td>
+          <td style="text-align: left">3,000</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">475</td>
+          <td style="text-align: left">1,500,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">2130</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">5,000</td>
+          <td style="text-align: left">5,000</td>
+          <td style="text-align: left">1,600</td>
+          <td style="text-align: left">735</td>
+          <td style="text-align: left">2,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">2140</td>
+          <td style="text-align: left">20,000</td>
+          <td style="text-align: left">9,000</td>
+          <td style="text-align: left">9,000</td>
+          <td style="text-align: left">3,200</td>
+          <td style="text-align: left">1,400</td>
+          <td style="text-align: left">3,000,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 5. Firepower 2100 Series Performance - FTD Image</p>
+<p>Cisco also publishes performance number when Firepower 2100 is running ASA image captured in the next table.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Firewall Max (UDP) Mbps</th>
+          <th style="text-align: left">Firewall (Multi-protocol) Mbps</th>
+          <th style="text-align: left">VPN AES  Mbps</th>
+          <th style="text-align: left">Sessions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">2110</td>
+          <td style="text-align: left">3,000</td>
+          <td style="text-align: left">1,500</td>
+          <td style="text-align: left">500</td>
+          <td style="text-align: left">1,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">2120</td>
+          <td style="text-align: left">6,000</td>
+          <td style="text-align: left">3,000</td>
+          <td style="text-align: left">700</td>
+          <td style="text-align: left">1,500,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">2130</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">5,000</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">2,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">2140</td>
+          <td style="text-align: left">20,000</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">2,000</td>
+          <td style="text-align: left">3,000,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 6. Firepower 2100 Series Performance - ASA Image</p>
+<p>Firepower 4100 Series consists of 7 models. Original models are 41×0 and 41×5 are more recent addition. All devices are 1RU. This series can operate at much higher speed and is positioned for data center use. It can also run multiple instances of FTDs using Docker container packaging.</p>
+<p>The device has 2 x86 CPUs with internal hardware optimization with programmable Smart NICs and Crypto Accelerators.</p>
+<p>450-byte packet size numbers are published and shown in the table below for FTD image.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Firewall Max (UDP) Mbps</th>
+          <th style="text-align: left">FW+AVC 1024 byte Mbps</th>
+          <th style="text-align: left">FW+AVC 450 byte Mbps</th>
+          <th style="text-align: left">FW+AVC + NGIPS 1024 byte Mbps</th>
+          <th style="text-align: left">FW+AVC + NGIPS 450 byte Mbps</th>
+          <th style="text-align: left">VPN AES  Mbps</th>
+          <th style="text-align: left">TLS   Mbps</th>
+          <th style="text-align: left">Sessions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">4110</td>
+          <td style="text-align: left">35,000</td>
+          <td style="text-align: left">13,000</td>
+          <td style="text-align: left">3,500</td>
+          <td style="text-align: left">11,000</td>
+          <td style="text-align: left">2,500</td>
+          <td style="text-align: left">6,000</td>
+          <td style="text-align: left">4,500</td>
+          <td style="text-align: left">10,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4115</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">27,000</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">26,000</td>
+          <td style="text-align: left">7,000</td>
+          <td style="text-align: left">8,000</td>
+          <td style="text-align: left">6,500</td>
+          <td style="text-align: left">15,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4120</td>
+          <td style="text-align: left">60,000</td>
+          <td style="text-align: left">22,000</td>
+          <td style="text-align: left">6,500</td>
+          <td style="text-align: left">19,000</td>
+          <td style="text-align: left">4,500</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">7,100</td>
+          <td style="text-align: left">15,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4125</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">40,000</td>
+          <td style="text-align: left">13,000</td>
+          <td style="text-align: left">35,000</td>
+          <td style="text-align: left">9,000</td>
+          <td style="text-align: left">14,000</td>
+          <td style="text-align: left">8,000</td>
+          <td style="text-align: left">25,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4140</td>
+          <td style="text-align: left">70,000</td>
+          <td style="text-align: left">32,000</td>
+          <td style="text-align: left">9,500</td>
+          <td style="text-align: left">27,000</td>
+          <td style="text-align: left">6,500</td>
+          <td style="text-align: left">13,000</td>
+          <td style="text-align: left">7,300</td>
+          <td style="text-align: left">25,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4145</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">53,000</td>
+          <td style="text-align: left">17,000</td>
+          <td style="text-align: left">45,000</td>
+          <td style="text-align: left">12,000</td>
+          <td style="text-align: left">18,000</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">30,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4150</td>
+          <td style="text-align: left">75,000</td>
+          <td style="text-align: left">45,000</td>
+          <td style="text-align: left">14,500</td>
+          <td style="text-align: left">39,000</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">14,000</td>
+          <td style="text-align: left">7,500</td>
+          <td style="text-align: left">30,000,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 7. Firepower 4100 Series Performance - FTD Image</p>
+<p>4100 ASA image performance is as per table below.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Firewall Max (UDP) Mbps</th>
+          <th style="text-align: left">Firewall (Multi-protocol) Mbps</th>
+          <th style="text-align: left">VPN AES  Mbps</th>
+          <th style="text-align: left">Sessions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">4110</td>
+          <td style="text-align: left">35,000</td>
+          <td style="text-align: left">15,000</td>
+          <td style="text-align: left">8,000</td>
+          <td style="text-align: left">10,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4115</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">40,000</td>
+          <td style="text-align: left">15,000</td>
+          <td style="text-align: left">15,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4120</td>
+          <td style="text-align: left">60,000</td>
+          <td style="text-align: left">30,000</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">15,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4125</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">45,000</td>
+          <td style="text-align: left">19,000</td>
+          <td style="text-align: left">25,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4140</td>
+          <td style="text-align: left">70,000</td>
+          <td style="text-align: left">40,000</td>
+          <td style="text-align: left">14,000</td>
+          <td style="text-align: left">25,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4145</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">50,000</td>
+          <td style="text-align: left">23,000</td>
+          <td style="text-align: left">40,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4150</td>
+          <td style="text-align: left">75,000</td>
+          <td style="text-align: left">50,000</td>
+          <td style="text-align: left">15,000</td>
+          <td style="text-align: left">35,000,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 8. Firepower 4100 Series Performance - ASA Image</p>
+<p>Firepower 9300 is carrier-grade modular firewall in 3RU form factor. Each firewall can have up to 3 security modules installed of the same type, which are internally clustered. Security modules have the same architecture as Firepower 4100 with 2 x86 CPUs, Smart NIC and Crypto Accelerator.</p>
+<p>Model number and naming is based on number of CPU cores per socket. Performance is published for single security module and for 3x clustered modules to show how throughput scales.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Firewall Max (UDP) Mbps</th>
+          <th style="text-align: left">FW+AVC 1024 byte Mbps</th>
+          <th style="text-align: left">FW+AVC 450 byte Mbps</th>
+          <th style="text-align: left">FW+AVC + NGIPS 1024 byte Mbps</th>
+          <th style="text-align: left">FW+AVC + NGIPS 450 byte Mbps</th>
+          <th style="text-align: left">VPN AES  Mbps</th>
+          <th style="text-align: left">TLS   Mbps</th>
+          <th style="text-align: left">Sessions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">SM-24</td>
+          <td style="text-align: left">75,000</td>
+          <td style="text-align: left">25,000</td>
+          <td style="text-align: left">7,500</td>
+          <td style="text-align: left">21,000</td>
+          <td style="text-align: left">5,000</td>
+          <td style="text-align: left">13,500</td>
+          <td style="text-align: left">7,500</td>
+          <td style="text-align: left">30,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SM-36</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">34,000</td>
+          <td style="text-align: left">9,500</td>
+          <td style="text-align: left">29,000</td>
+          <td style="text-align: left">7,000</td>
+          <td style="text-align: left">16,000</td>
+          <td style="text-align: left">8,500</td>
+          <td style="text-align: left">30,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SM-44</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">50,000</td>
+          <td style="text-align: left">16,000</td>
+          <td style="text-align: left">43,000</td>
+          <td style="text-align: left">11,500</td>
+          <td style="text-align: left">17,000</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">30,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">3x SM-44</td>
+          <td style="text-align: left">234,000</td>
+          <td style="text-align: left">148,000</td>
+          <td style="text-align: left">48,000</td>
+          <td style="text-align: left">132,000</td>
+          <td style="text-align: left">32,500</td>
+          <td style="text-align: left">51,000</td>
+          <td style="text-align: left">25,000</td>
+          <td style="text-align: left">63,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SM-40</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">54,000</td>
+          <td style="text-align: left">19,000</td>
+          <td style="text-align: left">48,000</td>
+          <td style="text-align: left">13,000</td>
+          <td style="text-align: left">20,000</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">35,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SM-48</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">64,000</td>
+          <td style="text-align: left">22,000</td>
+          <td style="text-align: left">55,000</td>
+          <td style="text-align: left">15,000</td>
+          <td style="text-align: left">25,000</td>
+          <td style="text-align: left">11,000</td>
+          <td style="text-align: left">35,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SM-56</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">70,000</td>
+          <td style="text-align: left">25,000</td>
+          <td style="text-align: left">64,000</td>
+          <td style="text-align: left">18,000</td>
+          <td style="text-align: left">27,000</td>
+          <td style="text-align: left">12,000</td>
+          <td style="text-align: left">35,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">3x SM-56</td>
+          <td style="text-align: left">235,000</td>
+          <td style="text-align: left">168,000</td>
+          <td style="text-align: left">60,000</td>
+          <td style="text-align: left">153,000</td>
+          <td style="text-align: left">43,000</td>
+          <td style="text-align: left">81,000</td>
+          <td style="text-align: left">28,000</td>
+          <td style="text-align: left">60,000,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 9. Firepower 9300 Series Performance - FTD Image</p>
+<p>9300 ASA image performance is as per table below.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Firewall Max (UDP) Mbps</th>
+          <th style="text-align: left">Firewall (Multi-protocol) Mbps</th>
+          <th style="text-align: left">VPN AES  Mbps</th>
+          <th style="text-align: left">Sessions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">SM-24</td>
+          <td style="text-align: left">75,000</td>
+          <td style="text-align: left">50,000</td>
+          <td style="text-align: left">15,000</td>
+          <td style="text-align: left">55,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SM-36</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">60,000</td>
+          <td style="text-align: left">18,000</td>
+          <td style="text-align: left">60,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SM-44</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">60,000</td>
+          <td style="text-align: left">20,000</td>
+          <td style="text-align: left">60,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">3x SM-44</td>
+          <td style="text-align: left">234,000</td>
+          <td style="text-align: left">130,000</td>
+          <td style="text-align: left">60,000</td>
+          <td style="text-align: left">70,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SM-40</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">55,000</td>
+          <td style="text-align: left">25,000</td>
+          <td style="text-align: left">55,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SM-48</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">60,000</td>
+          <td style="text-align: left">27,000</td>
+          <td style="text-align: left">60,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">SM-56</td>
+          <td style="text-align: left">80,000</td>
+          <td style="text-align: left">64,000</td>
+          <td style="text-align: left">30,000</td>
+          <td style="text-align: left">60,000,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">3x SM-56</td>
+          <td style="text-align: left">235,000</td>
+          <td style="text-align: left">172,000</td>
+          <td style="text-align: left">74,000</td>
+          <td style="text-align: left">195,000,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 10. Firepower 9300 Series Performance - ASA Image</p>
+<h2 id="cisco-asav">Cisco ASAv</h2>
+<p>ASAv is virtualized Cisco ASA that can be deployed on all popular virtualization platforms, including VMware ESXi, KVM and Hyper-V. Use cases for virtualized platforms data center deployments with Cisco ACI where firewall provisioning and insertion can be automated. ASAv is also supported in Azure and AWS.</p>
+<p>There are 4 models available with the parameters and performance numbers as per table below. Measurement was performed on Xeon E5-2690v4 with SR-IOV.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">vCPUs</th>
+          <th style="text-align: left">RAM  GB</th>
+          <th style="text-align: left">Firewall Max (UDP) Mbps</th>
+          <th style="text-align: left">Firewall (Multi-protocol) Mbps</th>
+          <th style="text-align: left">VPN AES  Mbps</th>
+          <th style="text-align: left">Sessions</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">ASAv5</td>
+          <td style="text-align: left">1</td>
+          <td style="text-align: left">1.5</td>
+          <td style="text-align: left">100</td>
+          <td style="text-align: left">50</td>
+          <td style="text-align: left">50</td>
+          <td style="text-align: left">50,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">ASAv10</td>
+          <td style="text-align: left">1</td>
+          <td style="text-align: left">2</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">500</td>
+          <td style="text-align: left">250</td>
+          <td style="text-align: left">100,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">ASAv30</td>
+          <td style="text-align: left">4</td>
+          <td style="text-align: left">8</td>
+          <td style="text-align: left">2,000</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">750</td>
+          <td style="text-align: left">500,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">ASAv50</td>
+          <td style="text-align: left">8</td>
+          <td style="text-align: left">16</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">5,000</td>
+          <td style="text-align: left">10,000</td>
+          <td style="text-align: left">2,000,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 11. Cisco ASAv Performance</p>
+<h2 id="cisco-ngfwv">Cisco NGFWv</h2>
+<p>NGFWv can be deployed on VMware ESXi and KVM. Hyper-V is not supported. Both Azure and AWS can host NGFWv. Use case for virtual NGFWv are the same as with Cisco ASAv.</p>
+<p>There are 3 supported CPU/RAM configurations listed below.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">vCPUs</th>
+          <th style="text-align: left">RAM  GB</th>
+          <th style="text-align: left">FW+AVC 1024 byte Mbps</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">4</td>
+          <td style="text-align: left">8</td>
+          <td style="text-align: left">2,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">8</td>
+          <td style="text-align: left">16</td>
+          <td style="text-align: left">4,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">12</td>
+          <td style="text-align: left">24</td>
+          <td style="text-align: left">8,000</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 12. Cisco NGFWv Performance</p>
+<h2 id="meraki-mx">Meraki MX</h2>
+<p>Cisco acquired Meraki in 2012. Meraki products are cloud-controlled and target customers looking for simpler management and rapid provisioning. There are unique features, such as Auto VPN which provides very quick and simple way to establish full mesh VPN site-to-site connectivity. This is possible due to centralized cloud control plane which performs automatic security parameters management.</p>
+<p>There are some drawbacks in configuration flexibility and feature set. For example, Application Layer Gateway (ALG) functionality is not supported with MX firewalls which can affect VoIP support. See the following <a href="https://documentation.meraki.com/zGeneral_Administration/Tools_and_Troubleshooting/VoIP_on_Cisco_Meraki%3A_F.A.Q._and_Troubleshooting_Tips">URL</a> for details.</p>
+<p>Base license includes stateful firewall and Auto VPN features. Advanced security services license unlocks IPS, Advanced Malware Protection and Content Filtering.</p>
+<p>Meraki MX firewalls for small branches include the following models:</p>
+<ul>
+<li>MX64, MX64W</li>
+<li>MX65, MX65W (similar to MX64, but with extra ports)</li>
+<li>MX67, MX67W, MX67C</li>
+<li>MX68, MX68W, MX68CW (similar to MX67, but with extra ports)</li>
+</ul>
+<p>W in the model number is wireless support and C is built-in 3G/4G. All models support 3G/4G USB modems for failover connectivity.</p>
+<p>Medium branch:</p>
+<ul>
+<li>MX84</li>
+<li>MX100</li>
+</ul>
+<p>Large branch/campus:</p>
+<ul>
+<li>MX250</li>
+<li>MX450</li>
+</ul>
+<p>Public cloud support is possible with vMX. It can be deployed on AWS and Azure to provide VPN concentrator functionality.</p>
+<div class="table-wrapper">
+  <table>
+  <thead>
+      <tr>
+          <th style="text-align: left">Model</th>
+          <th style="text-align: left">Stateful Firewall  Mbps</th>
+          <th style="text-align: left">VPN Throughput  Mbps</th>
+          <th style="text-align: left">Recommended number of users</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">MX64, MX64W, MX65, MX65W</td>
+          <td style="text-align: left">250</td>
+          <td style="text-align: left">100</td>
+          <td style="text-align: left">50</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">MX67, MX67W, MX67C, MX68, MX68W, MX68CW</td>
+          <td style="text-align: left">450</td>
+          <td style="text-align: left">200</td>
+          <td style="text-align: left">50</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">MX84</td>
+          <td style="text-align: left">500</td>
+          <td style="text-align: left">250</td>
+          <td style="text-align: left">200</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">MX100</td>
+          <td style="text-align: left">750</td>
+          <td style="text-align: left">500</td>
+          <td style="text-align: left">500</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">MX250</td>
+          <td style="text-align: left">4,000</td>
+          <td style="text-align: left">1,000</td>
+          <td style="text-align: left">2,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">MX450</td>
+          <td style="text-align: left">6,000</td>
+          <td style="text-align: left">2,000</td>
+          <td style="text-align: left">10,000</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">vMX100</td>
+          <td style="text-align: left">500</td>
+          <td style="text-align: left">500</td>
+          <td style="text-align: left">N/A</td>
+      </tr>
+  </tbody>
+</table>
+
+</div>
+<p>Table 13. Meraki MX Performance</p>
+
+
+                
+                <div class="mt-9">
+                    
+                    
+                    <nav class="inline-grid grid-cols-4 space-x-2.5 w-full justify-center pt-5">
+
+                        
+                        <a class="text-center col-start-2  py-2 px-3 rounded font-medium select-none border text-gray-900  bg-white transition-colors hover:border-gray-400 hover:bg-gray-700 hover:text-white "
+                            href="/cisco-zone-based-firewall-configuration-step-by-step-part-2/">
+                            &lt; Prev
+                        </a>
+                        
+
+                        
+                    </nav>
+
+                </div>
+                
+
+
+
+        </div>
+        
+        <div class="mt-6 ml-6">
+
+                <h2 class="mb-5">Categories:</h2>
+                <ul class="text-cyan-500">
+                    
+                        <li class="mb-1"><a href="/category/cisco/">Cisco</a></li>
+                    
+                        <li class="mb-1"><a href="/category/cisco-asa/">Cisco ASA</a></li>
+                    
+                        <li class="mb-1"><a href="/category/palo-alto/">Palo Alto</a></li>
+                    
+                        <li class="mb-1"><a href="/category/pki/">PKI</a></li>
+                    
+                </ul>
+                <br>
+
+                
+                <br>
+                
+                <h2 class="mb-5">Recent posts:</h2>
+                <ul class="text-cyan-500">
+                    
+                        <li><a class="mb-1" href="/cisco-firewall-models-and-performance/">Cisco Firewall Models and Performance</a></li>
+                    
+                        <li><a class="mb-1" href="/cisco-zone-based-firewall-configuration-step-by-step-part-2/">Cisco Zone Based Firewall Configuration Step By Step Part 2</a></li>
+                    
+                        <li><a class="mb-1" href="/cisco-zone-based-firewall-configuration-step-by-step-part-1/">Cisco Zone Based Firewall Configuration Step By Step Part 1</a></li>
+                    
+                        <li><a class="mb-1" href="/install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls/">Install SSL certificate on Palo Alto Networks or Cisco ASA Firewalls</a></li>
+                    
+                        <li><a class="mb-1" href="/site-to-site-vpns-on-palo-alto-network-firewalls/">Site-To-Site VPNs on Palo Alto Networks Firewalls</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    </main>
+    <footer class="pt-24 text-center text-sm">
+          
+            <a href="/privacy-policy" style="text-decoration:none;" class="link-dark">Privacy Policy</a> - 
+            <a href="/terms-and-conditions" style="text-decoration:none;" class="link-dark">Terms and Conditions</a></p>
+            <p class="text-dark">Copyright &copy; 2025 threatfiltering.net</p>
+
+    </footer>
+  </div>
+</body>
+</html>

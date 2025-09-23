@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cisco Zone Based Firewall Configuration Step By Step Part 1 | Threat Filtering</title>
+
+
+<link rel="stylesheet" href="https://threatfiltering.com/css/style.css" />
+</head>
+<body>
+  <div class="mx-auto w-full max-w-7xl">
+    <header class="bg-white">
+      
+
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+            
+                <div class="text-2xl font-bold text-gray-800">
+                    <a href="/">
+                        <img src="/img/logo.png" width="181" height="92" alt="">
+                    </a>
+                </div>
+
+                
+                <div>
+                    <a href="/contact-us/" class="inline-block px-5 py-2 text-gray-700">Contact Us</a>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </header>
+    <main>
+      
+    
+
+    <div class="grid grid-cols-1 md:grid-cols-3 m3 md:m-12">
+        <div id="main-content" class="col-span-2 m-3 text-align-left font-sans text-base/relaxed tracking-wide md:border-r-gray-400 md:border-r-1 md:pr-12">
+                <h1 id="cisco-zone-based-firewall-configuration-step-by-step-part-1">Cisco Zone Based Firewall Configuration Step By Step: Part 1</h1>
+<p>This article is the first part of Cisco Zone Based firewall configuration. It provides technology overview, configuration constructs and simple network configuration example. The part 2 will provide more complex examples with NAT, DMZ, VPNs and operation of self zone.</p>
+<h2 id="overview">Overview</h2>
+<p>Cisco zone-based firewall (ZBF) is a feature of a Cisco router running IOS or IOS-XE. It is replacement for older CBAC (Context-Based Access Control) – “ip inspect” based configuration. Main difference is that ZBF uses zones with default “deny any” policy, and so called C3PL (Cisco Common Classification Policy Language) with class-maps and policy-maps constructs for classification and policy application.</p>
+<p>Cisco feature navigator (<a href="https://www.cisco.com/go/fn">www.cisco.com/go/fn</a>) displays routers, software version and the licensing level required to enable firewall functionality, as shown in the screenshot below. The first software version with ZBFW support is IOS 12.4(6)T, and IOS-XE 16.10.1a.</p>
+<img src="image-48.png" alt="" class="img-fluid py-4"><p>Always check release notes and documentation for the specific platform, as licensing can change and this feature can be licensed separately. For example, at the time of writing ASR1000 requires additional feature license which is not part of any technology packages.</p>
+<h2 id="stateful-firewall-technology">Stateful Firewall Technology</h2>
+<p>As the name implies, stateful firewall monitors the state of the session. In comparison with stateless packet filters, which require access rules to be applied bi-directionally, stateful firewall requires only initial direction of the session to be allowed in the rule. Return traffic is allowed by router being able to match it to the existing session.</p>
+<p>Session can be a single TCP or UDP flow when only transport-protocol level specifics must be tracked. And in more complex scenarios, it can be several sessions, for example, control flow of FTP or SIP, where secondary communications channels are created as separate flows.</p>
+<p>ZBF is stateful and can work with both simple transport-layer sessions and higher-level application protocols.</p>
+<h2 id="zones-and-interfaces">Zones and Interfaces</h2>
+<p>An administrator can designate parts of the network with different security requirements as security zones. A firewall or multiple firewalls are usually deployed on the boundary of the zones. For example, Internet, DMZ and LAN can represent 3 different security zones.</p>
+<p>An interface or multiple interfaces can then be assigned to those zones. When traffic arrives on a interface, it is classified as sourced from the zone this interface belongs. Traffic between interfaces of the same zone is allowed and traffic between interfaces in different zones is implicitly denied.</p>
+<p>There is a special zone called Self. It represents the router itself and by default the traffic to or from the router is implicitly allowed.</p>
+<h2 id="how-to-control-traffic-between-zones">How to Control Traffic Between Zones</h2>
+<p>Now, let’s compare the difference between non-zone-based (such as ACLs, CBAC and even ASA) to zone-based approaches (Cisco ZBF).</p>
+<p>Consider topology in the example below. In this sample topology, we want to apply our security policy, so DMZ can access Internet without any restrictions, however, only single SQL server on a single TCP port (MS SQL – 1433) on the LAN segment must be accessible.</p>
+<img src="image-49.png" alt="" class="img-fluid py-4"><h2 id="traditional-aclcbac">Traditional ACL/CBAC</h2>
+<p>Without zones, you would apply an ACL in ingress direction to DMZ interface of the firewall. On the left side of the diagram you can see 3 entries displayed. Requirement to provide Internet access to DMZ network causes us to put “permit any” rule on the very bottom. This rule opens access to Trust network, so we now have to put explicit deny entry #2 for LAN IP range.</p>
+<p>There are 2 potential issues with this configuration.</p>
+<p>Let’s say that we provision another LAN network with IP address of 10.1.6.0/24. We will require to go back and adjust configuration, so the DMZ is prohibited to access to this new network. While there is a workaround, if we will replace line #2 with deny statement to entire RFC1918 range, it is still would be more convenient to be able to use “AND” statement with line #3, stating that rule applies only if the egress is Internet-facing interface (or zone).</p>
+<p>The other issue, is that readability of the ruleset is not great, as we need to infer where each IP prefix is located.</p>
+<h2 id="zone-based-approach">Zone-based Approach</h2>
+<p>On the right side of the diagram, the same ruleset is encoded with zone-based approach. By being able to specify destination zone, we can now ensure that “permit any” rule doesn’t affect LAN or any other security zone that we can introduce in the future. It is also self-documenting, as we can clearly see direction of the traffic without having to look at the specific subnets. With larger ruleset this benefit is especially noticeable.</p>
+<p>Cisco ZBF enforces that a dedicated policy to be created between exactly one source and one destination zone. Cisco uses term zone-pair to identify such relationship. Note that zone-pair is directional, i.e. two zones initiating traffic to each other will have two zone pairs.</p>
+<p>Other vendor firewalls, such as Fortinet, Palo Alto Networks and Juniper, allow rules to contain multiple zones or even “any” keyword representing all zones in a single rule. However, it is up to administrator to either use this functionality or not to balance between number of rules and configuration readability.</p>
+<h2 id="configuration-elements">Configuration Elements</h2>
+<p>C3PL (or Cisco Common Classification Policy Language) is similar to the way how QoS is configured on Cisco routers. The configuration is done using the following elements:</p>
+<ul>
+<li>Interfaces</li>
+<li>Zones</li>
+<li>Zone Pairs</li>
+<li>Service Policies</li>
+<li>Policy Maps</li>
+<li>Class Maps</li>
+<li>Access Lists</li>
+</ul>
+<p>The diagram below shows how all the components interact with each other. Lines on the left with numbers display configuration order.</p>
+<img src="image-50.png" alt="" class="img-fluid py-4"><h2 id="practical-example">Practical Example</h2>
+<p>The diagram below shows topology that will be used in the next few examples. Static default route is configured on every spoke router.</p>
+<img src="image-51.png" alt="" class="img-fluid py-4"><h2 id="initial-connectivity-test">Initial Connectivity Test</h2>
+<p>To confirm that there is connectivity prior to applying any rules, let’s ping all other routers from WEST.</p>
+<pre tabindex="0"><code>! East is reachable
+WEST#ping 10.1.3.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.3.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
+! South is reachable
+WEST#ping 10.1.6.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.6.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
+! Firewall is reachable
+WEST#ping 10.1.9.1 
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.9.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+! North is reachable
+WEST#ping 10.1.12.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
+</code></pre><h2 id="communication-between-zoned-non-zoned-interfaces-and-self-zone">Communication Between Zoned, Non-zoned Interfaces and Self Zone</h2>
+<p>The diagram below shows how such communication works by default.</p>
+<img src="image-52.png" alt="" class="img-fluid py-4"><p>Let’s now create a security zone called OUTSIDE and move WEST-facing interface to this zone.</p>
+<pre tabindex="0"><code>FIREWALL(config)#zone security OUTSIDE
+FIREWALL(config-sec-zone)#description OUTSIDE
+FIREWALL(config-sec-zone)#exit
+FIREWALL(config)#interface gi2.9
+FIREWALL(config-subif)#zone-member security OUTSIDE
+FIREWALL(config-subif)#end
+! The command below shows summary of zones and interface assignment
+FIREWALL#show zone security 
+zone self
+  Description: System defined zone
+zone OUTSIDE
+  Description: OUTSIDE
+  Member Interfaces:
+    GigabitEthernet2.9
+</code></pre><p><strong>Tests Sourced From a Zoned Interface</strong></p>
+<p>In the next example some of the previous tests are re-launched to see how it affects traffic.</p>
+<pre tabindex="0"><code>! We cannot reach any other spoke routers
+WEST#ping 10.1.3.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.3.2, timeout is 2 seconds:
+.....
+Success rate is 0 percent (0/5)
+! We still can ping the firewall address
+WEST#ping 10.1.9.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.9.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+</code></pre><p><strong>Tests Sourced From a Non-Zoned Interface</strong></p>
+<p>And another set of tests to check how the configuration affected reachability from NORTH router.</p>
+<pre tabindex="0"><code>! West, which is now part of OUTSIDE zone is not reachable
+NORTH#ping 10.1.9.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.9.2, timeout is 2 seconds:
+.....
+Success rate is 0 percent (0/5)
+! East is still reachable
+NORTH#ping 10.1.3.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.3.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+! South is still reachable
+NORTH#ping 10.1.6.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.6.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
+! The firewall is still reachable
+NORTH#ping 10.1.12.1
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.12.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+</code></pre><p>These examples demonstrate that network connected to an interface that belongs to a zone, by default, cannot communicate to networks connected to interfaces that are not assigned to any zones.</p>
+<p>We can also see that communication to the router itself is reachable from both zoned and non-zoned interfaces.</p>
+<h2 id="communication-between-interfaces-members-of-the-same-zone">Communication Between Interfaces-Members of the Same Zone</h2>
+<p>The following diagram shows how this communication works.</p>
+<img src="image-53.png" alt="" class="img-fluid py-4"><p>In the following example we will assign NORTH-facing interface to OUTSIDE zone, so both WEST and NORTH routers are in the same zone.</p>
+<pre tabindex="0"><code>FIREWALL(config)#interface gi2.12
+FIREWALL(config-subif)#zone-member security OUTSIDE
+FIREWALL(config-subif)#end
+FIREWALL#show zone security 
+zone self
+  Description: System defined zone
+zone OUTSIDE
+  Description: OUTSIDE
+  Member Interfaces:
+    GigabitEthernet2.9
+    GigabitEthernet2.12
+</code></pre><p>Both North and West can now ping each other, as shown in the example below.</p>
+<pre tabindex="0"><code>NORTH#ping 10.1.9.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.9.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
+WEST#ping 10.1.12.2
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.1.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
+</code></pre><p>Note that it’s possible to apply rules for intra-zone traffic by using zone-pairs with the same source and destination zones.</p>
+<h2 id="default-zone">Default Zone</h2>
+<p>The default zone is a construct that allows you to implicitly assign “no-zone” interfaces to a default zone.  Then you can use default zone in zone-pairs. As the result, you can override no-communication rule between zoned and non-zoned interfaces.</p>
+<pre tabindex="0"><code>FIREWALL(config)#zone security default 
+FIREWALL(config-sec-zone)#end
+FIREWALL#show zone security 
+zone self
+  Description: System defined zone
+zone OUTSIDE
+  Description: OUTSIDE
+  Member Interfaces:
+    GigabitEthernet2.9
+    GigabitEthernet2.12
+zone default
+  Description: System level zone. Interface without zone membership is in this zone automatically
+</code></pre><h2 id="communication-between-zones-inside-to-outside">Communication Between Zones: Inside To Outside</h2>
+<p>Communications between zones is denied by default.</p>
+<img src="image-54.png" alt="" class="img-fluid py-4"><p>First, we will create INSIDE zone and move NORTH-facing interface of the FIREWALL to this new zone and confirm that there is no communication.</p>
+<pre tabindex="0"><code>FIREWALL(config)#zone security INSIDE
+FIREWALL(config-sec-zone)#exit
+FIREWALL(config)#int gi2.12
+FIREWALL(config-subif)#zone-member security INSIDE
+FIREWALL(config-subif)#end
+FIREWALL#show zone security
+zone self
+  Description: System defined zone
+zone OUTSIDE
+  Description: OUTSIDE
+  Member Interfaces:
+    GigabitEthernet2.9
+zone default
+  Description: System level zone. Interface without zone membership is in this zone automatically
+zone INSIDE
+  Member Interfaces:
+    GigabitEthernet2.12
+</code></pre><h2 id="perform-traffic-classification-access-lists">Perform Traffic Classification: Access Lists</h2>
+<p>Let’s implement the following simple rules for the example network:</p>
+<ul>
+<li>Allow ICMP from INSIDE to OUTSIDE for all hosts</li>
+<li>Allow HTTP and HTTPS from INSIDE to OUTSIDE for a single internal workstation</li>
+</ul>
+<p>The diagram below shows what we will implement in this section.</p>
+<img src="image-55.png" alt="" class="img-fluid py-4"><p>The configuration of new interface on NORTH and additional static route on the FIREWALL is straightforward and shown here only for completeness:</p>
+<pre tabindex="0"><code>NORTH(config)#int gi3
+NORTH(config-if)#ip address 172.16.2.1 255.255.255.0
+NORTH(config-if)#no shut
+
+FIREWALL(config)#ip route 172.16.2.0 255.255.255.0 10.1.12.2
+</code></pre><p>ICMP traffic doesn’t have any IP restrictions in our scenario, so we will not be defining ACL for it.</p>
+<p>For VM’s HTTP and HTTPS traffic, we can write several types of ACLs with broad classification on the top and very granular on the bottom, as shown in the examples below:</p>
+<pre tabindex="0"><code>!Option 1
+FIREWALL(config)#ip access-list extended VM-TO-ANY
+FIREWALL(config-ext-nacl)# permit ip host 172.16.2.50 any
+
+!Option 2
+FIREWALL(config)#ip access-list extended VM-TO-ANY-HTTP-HTTPS
+FIREWALL(config-ext-nacl)# permit tcp host 172.16.2.50 any eq www
+FIREWALL(config-ext-nacl)# permit tcp host 172.16.2.50 any eq 443
+
+!Option 3
+FIREWALL(config)#ip access-list extended VM-TO-ANY-HTTP
+FIREWALL(config-ext-nacl)# permit tcp host 172.16.2.50 any eq www
+FIREWALL(config)#ip access-list extended VM-TO-ANY-HTTPS
+FIREWALL(config-ext-nacl)# permit tcp host 172.16.2.50 any eq 443
+</code></pre><p>All of 3 options can be used to achieve the same result when used in class-map in combination with protocol matching.</p>
+<p>First option is highly reusable, so if you need to define protocol inspection for multiple protocols, you can use the same ACL for all class-maps. However, if you omit “match protocol” statement in class-map, VM will have unrestricted access due to the fact that there is no filtering done on ACL level.</p>
+<p>The last option defines every single protocol that is being allowed as a separate ACL. The configuration is self-documenting, however, it can grow to very large list of statements which may be difficult to support.</p>
+<p>The second option is balanced by grouping all access requirements for a single host, or group of hosts under the same access list, ensuring that ACL, even when applied without “match protocol” statement, provides only required access for the host.</p>
+<h2 id="perform-traffic-classification-class-maps">Perform Traffic Classification: Class Maps</h2>
+<p>The next step is to create associated class-maps. Let’s define class for ICMP first:</p>
+<pre tabindex="0"><code>FIREWALL(config)#class-map type inspect match-all ICMP
+FIREWALL(config-cmap)#match protocol icmp
+</code></pre><p>For HTTP/HTTPS traffic let’s use generic version of access list from the previous section.</p>
+<pre tabindex="0"><code>FIREWALL(config)#ip access-list extended VM-TO-ANY
+FIREWALL(config-ext-nacl)# permit ip host 172.16.2.50 any
+</code></pre><p>Class-maps can use Boolean AND logic with match-all keyword or Boolean OR logic when match-any keyword is used. In our case, we want both ACL and protocol to match. However, between protocols we want OR logic, as traffic cannot match 2 different protocols at the same time.</p>
+<p>One option is to use two different class-maps, as shown in the example below.</p>
+<pre tabindex="0"><code>FIREWALL(config)#class-map type inspect match-all VM-HTTP-TRAFFIC
+FIREWALL(config-cmap)#match access-group name VM-TO-ANY
+FIREWALL(config-cmap)#match protocol http
+FIREWALL(config-cmap)#exit
+FIREWALL(config)#class-map type inspect match-all VM-HTTPS-TRAFFIC
+FIREWALL(config-cmap)#match access-group name VM-TO-ANY
+FIREWALL(config-cmap)#match protocol https
+FIREWALL(config-cmap)#exit
+</code></pre><p>More efficient approach is to use a nested class-map which will either match HTTP or HTTPS (Boolean OR). It will be then used in the parent class-map which will look for matching both IP access list and the child class-map (Boolean AND).</p>
+<pre tabindex="0"><code>! This class-map matches either HTTP or HTTPS due to match-any keyword
+FIREWALL(config)#class-map type inspect match-any VM-ALLOWED-PROTOCOLS
+FIREWALL(config-cmap)#match protocol http
+FIREWALL(config-cmap)#match protocol https
+FIREWALL(config-cmap)#exit
+! This class-map matches both VM-TO-ANY ACL and VM-ALLOWED-PROTOCOLS Class-map
+FIREWALL(config)#class-map type inspect match-all VM-ALLOWED-TRAFFIC
+FIREWALL(config-cmap)#match access-group name VM-TO-ANY
+FIREWALL(config-cmap)#match class-map VM-ALLOWED-PROTOCOLS
+FIREWALL(config-cmap)#exit
+</code></pre><p>Note that order of “match protocol” statements is important. Always insert protocol-specific statements above generic match protocol tcp or udp statements. For example, FTP matches both application-level and TCP-level inspection, however, if FTP is treated as generic TCP protocol, firewall will not inspect and allow connectivity for the secondary channel.</p>
+<h2 id="binding-everything-together-with-policy-maps-and-zone-pairs">Binding Everything Together with Policy Maps and Zone Pairs</h2>
+<p>Now we know what traffic we want to permit, it’s time to apply individual policy actions to classes and bind the configuration to directional zone-pair.</p>
+<pre tabindex="0"><code>FIREWALL(config)#policy-map type inspect INSIDE-TO-OUTSIDE
+FIREWALL(config-pmap)# class type inspect ICMP
+FIREWALL(config-pmap-c)#inspect
+FIREWALL(config-pmap-c)#exit
+FIREWALL(config-pmap)#class type inspect VM-ALLOWED-TRAFFIC
+FIREWALL(config-pmap-c)#inspect
+FIREWALL(config-pmap-c)#exit
+FIREWALL(config-pmap)#exit
+FIREWALL(config)#zone-pair security ZONE-PAIR-INSIDE-TO-OUTSIDE source INSIDE destination OUTSIDE 
+FIREWALL(config-sec-zone-pair)#service-policy type inspect INSIDE-TO-OUTSIDE
+</code></pre><p>To perform testing HTTP and HTTPS services are enabled on WEST router:</p>
+<pre tabindex="0"><code>WEST(config)#ip http server 
+WEST(config)#ip http secure-server
+</code></pre><p>From a test workstation, let’s perform tests and then use show commands to see the results.</p>
+<p>All data plane tests are successful.</p>
+<img src="image-56.png" alt="" class="img-fluid py-4"><img src="image-57.png" alt="" class="img-fluid py-4"><img src="image-58.png" alt="" class="img-fluid py-4"><p>The following command displays detailed statistics about each protocol.</p>
+<pre tabindex="0"><code>FIREWALL#show policy-map type inspect zone-pair ZONE-PAIR-INSIDE-TO-OUTSIDE
+   Zone-pair: ZONE-PAIR-INSIDE-TO-OUTSIDE 
+   Service-policy inspect : INSIDE-TO-OUTSIDE
+ Class-map: ICMP (match-all)  
+  Match: protocol icmp
+  Inspect
+    Packet inspection statistics [process switch:fast switch]
+    icmp packets: [0:22]
+
+    Session creations since subsystem startup or last reset 2
+    Current session counts (estab/half-open/terminating) [0:0:0]
+    Maxever session counts (estab/half-open/terminating) [1:0:0]
+    Last session created 00:07:40
+    Last statistic reset never
+    Last session creation rate 0
+    Last half-open session total 0
+
+ Class-map: VM-ALLOWED-TRAFFIC (match-all)  
+  Match: access-group name VM-TO-ANY
+  Match: class-map match-any VM-ALLOWED-PROTOCOLS
+    Match: protocol http
+    Match: protocol https
+  Inspect
+    Packet inspection statistics [process switch:fast switch]
+    tcp packets: [0:2014]
+    http packets: [0:1279]
+
+    Session creations since subsystem startup or last reset 256
+    Current session counts (estab/half-open/terminating) [0:0:0]
+    Maxever session counts (estab/half-open/terminating) [3:1:0]
+    Last session created 00:00:06
+    Last statistic reset never
+    Last session creation rate 97
+    Last half-open session total 0
+
+ Class-map: class-default (match-any)  
+  Match: any 
+  Drop (default action)
+    6 packets, 576 bytes
+</code></pre><p>To display list of sessions use the following command:</p>
+<pre tabindex="0"><code>FIREWALL#show policy-firewall sessions platform 
+--show platform hardware qfp active feature firewall datapath scb any any any any any all any --
+s=session  i=imprecise channel  c=control channel  d=data channel
+Session ID:0x00000159  172.16.2.50 49499 10.1.9.2 443 proto 6 (0:0)     [sd]
+Session ID:0x00000157  172.16.2.50 8 10.1.9.2 1 proto 1 (0:0)   [sc]
+Session ID:0x00000158  172.16.2.50 49498 10.1.9.2 443 proto 6 (0:0)     [sd]
+</code></pre><h2 id="coexistence-with-access-lists-applied-to-the-interface">Coexistence with Access Lists Applied to the Interface</h2>
+<p>Let’s block ICMP traffic input on the interface level while allowing everything else on NORTH-facing interface, which is part of security zone.</p>
+<pre tabindex="0"><code>FIREWALL(config)#ip access-list extended DENY_ICMP
+FIREWALL(config-ext-nacl)#deny icmp any any 
+FIREWALL(config-ext-nacl)#permit ip any any 
+FIREWALL(config-ext-nacl)#end
+FIREWALL(config)#int gi2.12
+FIREWALL(config-subif)#ip access-group DENY_ICMP in   
+</code></pre><p>Ping no longer works, as shown in the screenshot below, meaning that inbound ACLs are being evaluated first, and as result must either not be used or have more permissive settings that zone-based configuration.</p>
+<img src="image-59.png" alt="" class="img-fluid py-4">
+
+                
+                <div class="mt-9">
+                    
+                    
+                    <nav class="inline-grid grid-cols-4 space-x-2.5 w-full justify-center pt-5">
+
+                        
+                        <a class="text-center col-start-2  py-2 px-3 rounded font-medium select-none border text-gray-900  bg-white transition-colors hover:border-gray-400 hover:bg-gray-700 hover:text-white "
+                            href="/install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls/">
+                            &lt; Prev
+                        </a>
+                        
+
+                        
+                        <a class="text-center col-start-3 py-2 px-3 rounded font-medium select-none border text-gray-900  bg-white dtransition-colors hover:border-gray-400 hover:bg-gray-700 hover:text-white "
+                            href="/cisco-zone-based-firewall-configuration-step-by-step-part-2/">
+                            Next > </a>
+                        
+                    </nav>
+
+                </div>
+                
+
+
+
+        </div>
+        
+        <div class="mt-6 ml-6">
+
+                <h2 class="mb-5">Categories:</h2>
+                <ul class="text-cyan-500">
+                    
+                        <li class="mb-1"><a href="/category/cisco/">Cisco</a></li>
+                    
+                        <li class="mb-1"><a href="/category/cisco-asa/">Cisco ASA</a></li>
+                    
+                        <li class="mb-1"><a href="/category/palo-alto/">Palo Alto</a></li>
+                    
+                        <li class="mb-1"><a href="/category/pki/">PKI</a></li>
+                    
+                </ul>
+                <br>
+
+                
+                <br>
+                
+                <h2 class="mb-5">Recent posts:</h2>
+                <ul class="text-cyan-500">
+                    
+                        <li><a class="mb-1" href="/cisco-firewall-models-and-performance/">Cisco Firewall Models and Performance</a></li>
+                    
+                        <li><a class="mb-1" href="/cisco-zone-based-firewall-configuration-step-by-step-part-2/">Cisco Zone Based Firewall Configuration Step By Step Part 2</a></li>
+                    
+                        <li><a class="mb-1" href="/cisco-zone-based-firewall-configuration-step-by-step-part-1/">Cisco Zone Based Firewall Configuration Step By Step Part 1</a></li>
+                    
+                        <li><a class="mb-1" href="/install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls/">Install SSL certificate on Palo Alto Networks or Cisco ASA Firewalls</a></li>
+                    
+                        <li><a class="mb-1" href="/site-to-site-vpns-on-palo-alto-network-firewalls/">Site-To-Site VPNs on Palo Alto Networks Firewalls</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    </main>
+    <footer class="pt-24 text-center text-sm">
+          
+            <a href="/privacy-policy" style="text-decoration:none;" class="link-dark">Privacy Policy</a> - 
+            <a href="/terms-and-conditions" style="text-decoration:none;" class="link-dark">Terms and Conditions</a></p>
+            <p class="text-dark">Copyright &copy; 2025 threatfiltering.net</p>
+
+    </footer>
+  </div>
+</body>
+</html>

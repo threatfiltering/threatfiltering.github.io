@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>PKI on Threat Filtering</title>
+    <link>https://threatfiltering.com/category/pki/</link>
+    <description>Recent content in PKI on Threat Filtering</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 02 Jun 2019 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://threatfiltering.com/category/pki/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Install SSL certificate on Palo Alto Networks or Cisco ASA Firewalls</title>
+      <link>https://threatfiltering.com/install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls/</link>
+      <pubDate>Sun, 02 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls/</guid>
+      <description>&lt;h1 id=&#34;install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls&#34;&gt;Install SSL certificate on Palo Alto Networks or Cisco ASA Firewalls&lt;/h1&gt;&#xA;&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;&#xA;&lt;p&gt;Firewalls require SSL certificates in one of the following scenarios:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Secure management WebGUI access&lt;/li&gt;&#xA;&lt;li&gt;Provide SSL-based remote VPN&lt;/li&gt;&#xA;&lt;li&gt;Perform peer authentication to establish Site-To-Site VPN tunnels&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Administrator’s tasks include obtaining a certificate either through public or enterprise Certificate Authority, certificate renewal and ensuring that the private key is safe and backed up.&lt;/p&gt;&#xA;&lt;p&gt;This article describes basic concepts of a SSL certificate and step-by-step instruction on how to obtain SSL certificate, back it up and restore if the device fail.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

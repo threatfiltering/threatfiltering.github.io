@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Category on Threat Filtering</title>
+    <link>https://threatfiltering.com/category/</link>
+    <description>Recent content in Category on Threat Filtering</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 02 Jul 2019 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://threatfiltering.com/category/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Cisco</title>
+      <link>https://threatfiltering.com/category/cisco/</link>
+      <pubDate>Tue, 02 Jul 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/category/cisco/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Cisco ASA</title>
+      <link>https://threatfiltering.com/category/cisco-asa/</link>
+      <pubDate>Sun, 02 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/category/cisco-asa/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Palo Alto</title>
+      <link>https://threatfiltering.com/category/palo-alto/</link>
+      <pubDate>Sun, 02 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/category/palo-alto/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>PKI</title>
+      <link>https://threatfiltering.com/category/pki/</link>
+      <pubDate>Sun, 02 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/category/pki/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

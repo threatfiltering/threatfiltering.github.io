@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Network Automation Home Page on Threat Filtering</title>
+    <link>https://threatfiltering.com/</link>
+    <description>Recent content in Network Automation Home Page on Threat Filtering</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 22 Sep 2024 13:11:58 +0000</lastBuildDate>
+    <atom:link href="https://threatfiltering.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Contact Us</title>
+      <link>https://threatfiltering.com/contact-us/</link>
+      <pubDate>Sun, 22 Sep 2024 13:11:58 +0000</pubDate>
+      <guid>https://threatfiltering.com/contact-us/</guid>
+      <description>&lt;h1 id=&#34;contact-us&#34;&gt;Contact Us&lt;/h1&gt;&#xA;&lt;p&gt;Please send your suggestions and comments to this address:&#xA;&lt;img src=&#34;em.png&#34; alt=&#34;contact&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Privacy Policy</title>
+      <link>https://threatfiltering.com/privacy-policy/</link>
+      <pubDate>Sun, 22 Sep 2024 13:11:58 +0000</pubDate>
+      <guid>https://threatfiltering.com/privacy-policy/</guid>
+      <description>&lt;h1 id=&#34;privacy-policy&#34;&gt;Privacy Policy&lt;/h1&gt;&#xA;&lt;p&gt;Last updated: September 28, 2024&lt;/p&gt;&#xA;&lt;p&gt;Threat Filtering (“us”, “we”, or “our”) operates the threatfiltering.net website (the “Service”).&lt;/p&gt;&#xA;&lt;p&gt;This page informs you of our policies regarding the collection, use and disclosure of Personal Information when you use our Service.&lt;/p&gt;&#xA;&lt;p&gt;We will not use or share your information with anyone except as described in this Privacy Policy.&lt;/p&gt;&#xA;&lt;p&gt;We use your Personal Information for providing and improving the Service. By using the Service, you agree to the collection and use of information in accordance with this policy. Unless otherwise defined in this Privacy Policy, terms used in this Privacy Policy have the same meanings as in our Terms and Conditions, accessible at &lt;a href=&#34;https://threatfiltering.net&#34;&gt;https://threatfiltering.net&lt;/a&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Cisco Firewall Models and Performance</title>
+      <link>https://threatfiltering.com/cisco-firewall-models-and-performance/</link>
+      <pubDate>Tue, 02 Jul 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/cisco-firewall-models-and-performance/</guid>
+      <description>&lt;p&gt;This article is about Cisco Firewalls. It aggregates available information from datasheets published by Cisco.&lt;/p&gt;&#xA;&lt;h2 id=&#34;cisco-asa&#34;&gt;Cisco ASA&lt;/h2&gt;&#xA;&lt;p&gt;ASA or Adaptive Security Appliance is one of the most commonly deployed firewalls and successor of Cisco PIX, which was Cisco’s first firewall available with acquisition of Network Translation in 1995.&lt;/p&gt;&#xA;&lt;p&gt;Original ASA line consisted of 6 models with the following parameters, as published on Cisco website. All of the models below are well past End-Of-Sale date.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Cisco Zone Based Firewall Configuration Step By Step Part 2</title>
+      <link>https://threatfiltering.com/cisco-zone-based-firewall-configuration-step-by-step-part-2/</link>
+      <pubDate>Wed, 12 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/cisco-zone-based-firewall-configuration-step-by-step-part-2/</guid>
+      <description>&lt;h1 id=&#34;cisco-zone-based-firewall-step-by-step-part-2&#34;&gt;Cisco Zone Based Firewall Step By Step: Part 2&lt;/h1&gt;&#xA;&lt;p&gt;This article is the second part of Cisco Zone Based firewall configuration. The first part provided technology overview, configuration constructs and simple network configuration example.&lt;/p&gt;&#xA;&lt;p&gt;This part introduces more complex examples including NAT, DMZ, VPNs and operation of Self zone. Examples below are based on the configuration done previously in Part 1. You can also find good reference examples of policy-based and VTI site-to-site IPSec VPN tunnels, as well as NAT and DHCP protocol mechanics.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Cisco Zone Based Firewall Configuration Step By Step Part 1</title>
+      <link>https://threatfiltering.com/cisco-zone-based-firewall-configuration-step-by-step-part-1/</link>
+      <pubDate>Tue, 04 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/cisco-zone-based-firewall-configuration-step-by-step-part-1/</guid>
+      <description>&lt;h1 id=&#34;cisco-zone-based-firewall-configuration-step-by-step-part-1&#34;&gt;Cisco Zone Based Firewall Configuration Step By Step: Part 1&lt;/h1&gt;&#xA;&lt;p&gt;This article is the first part of Cisco Zone Based firewall configuration. It provides technology overview, configuration constructs and simple network configuration example. The part 2 will provide more complex examples with NAT, DMZ, VPNs and operation of self zone.&lt;/p&gt;&#xA;&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;&#xA;&lt;p&gt;Cisco zone-based firewall (ZBF) is a feature of a Cisco router running IOS or IOS-XE. It is replacement for older CBAC (Context-Based Access Control) – “ip inspect” based configuration. Main difference is that ZBF uses zones with default “deny any” policy, and so called C3PL (Cisco Common Classification Policy Language) with class-maps and policy-maps constructs for classification and policy application.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Install SSL certificate on Palo Alto Networks or Cisco ASA Firewalls</title>
+      <link>https://threatfiltering.com/install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls/</link>
+      <pubDate>Sun, 02 Jun 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls/</guid>
+      <description>&lt;h1 id=&#34;install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls&#34;&gt;Install SSL certificate on Palo Alto Networks or Cisco ASA Firewalls&lt;/h1&gt;&#xA;&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;&#xA;&lt;p&gt;Firewalls require SSL certificates in one of the following scenarios:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Secure management WebGUI access&lt;/li&gt;&#xA;&lt;li&gt;Provide SSL-based remote VPN&lt;/li&gt;&#xA;&lt;li&gt;Perform peer authentication to establish Site-To-Site VPN tunnels&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Administrator’s tasks include obtaining a certificate either through public or enterprise Certificate Authority, certificate renewal and ensuring that the private key is safe and backed up.&lt;/p&gt;&#xA;&lt;p&gt;This article describes basic concepts of a SSL certificate and step-by-step instruction on how to obtain SSL certificate, back it up and restore if the device fail.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Site-To-Site VPNs on Palo Alto Networks Firewalls</title>
+      <link>https://threatfiltering.com/site-to-site-vpns-on-palo-alto-network-firewalls/</link>
+      <pubDate>Fri, 05 Apr 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/site-to-site-vpns-on-palo-alto-network-firewalls/</guid>
+      <description>&lt;h1 id=&#34;site-to-site-vpns-on-palo-alto-networks-firewalls&#34;&gt;Site-To-Site VPNs on Palo Alto Networks Firewalls&lt;/h1&gt;&#xA;&lt;img src=&#34;IPSec-VPN.png&#34; alt=&#34;&#34; class=&#34;img-fluid py-4&#34;&gt;&lt;p&gt;Palo Alto Networks firewalls provide site-to-site and remote access VPN functionality. This article covers overview and configuration of IPSec site-to-site tunnels which are compatible with equipment from other vendors.&lt;/p&gt;&#xA;&lt;p&gt;IPSec tunnel is established between two gateways over IP network and is transparent to end devices communicating over this tunnel. Transport network (usually Internet) between gateways is responsible for packet delivery from one gateway to another. Routers on the Internet cannot see original packet content including endpoints’ IP addresses, as packets are encrypted and new IP headers are being added by gateways.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Packet Flow And Order Of Operations in Pan OS</title>
+      <link>https://threatfiltering.com/packet-flow-and-order-of-operations-in-pan-os/</link>
+      <pubDate>Fri, 15 Mar 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/packet-flow-and-order-of-operations-in-pan-os/</guid>
+      <description>&lt;h1 id=&#34;packet-flow-and-order-of-operations-in-pan-os&#34;&gt;Packet Flow and Order of Operations in PAN-OS&lt;/h1&gt;&#xA;&lt;p&gt;Order of operations in Palo Alto Networks firewalls consists of 6 stages: &lt;strong&gt;Ingress &amp;gt; Session Setup (Slowpath) &amp;gt; Existing Session (Fastpath) &amp;gt; Application Identification &amp;gt; Content Inspection &amp;gt; Egress Forwarding&lt;/strong&gt;. Understanding how traffic is being processed within the firewall is important for writing security and NAT policies and troubleshooting. The following sections provide information about each of the stages.&lt;/p&gt;&#xA;&lt;p&gt;Logical packet flow within Palo Alto firewall is depicted in the diagram below.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Terms and Conditions</title>
+      <link>https://threatfiltering.com/terms-and-conditions/</link>
+      <pubDate>Sun, 10 Mar 2019 13:11:58 +0000</pubDate>
+      <guid>https://threatfiltering.com/terms-and-conditions/</guid>
+      <description>&lt;h1 id=&#34;terms-and-conditions&#34;&gt;Terms and Conditions&lt;/h1&gt;&#xA;&lt;p&gt;Last updated: September 28, 2024&lt;/p&gt;&#xA;&lt;p&gt;Please read these Terms of Use (“Terms”, “Terms of Use”) carefully before using the &lt;a href=&#34;https://threatfiltering.net&#34;&gt;https://threatfiltering.net&lt;/a&gt; website (the “Service”) operated by Threat Filtering (“us”, “we”, or “our”).&lt;/p&gt;&#xA;&lt;p&gt;Your access to and use of the Service is conditioned on your acceptance of and compliance with these Terms. These Terms apply to all visitors, users and others who access or use the Service.&lt;/p&gt;&#xA;&lt;p&gt;By accessing or using the Service you agree to be bound by these Terms. If you disagree with any part of the terms then you may not access the Service.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Palo Alto Firewalls Configuration Management</title>
+      <link>https://threatfiltering.com/palo-alto-firewalls-configuration-management/</link>
+      <pubDate>Sun, 10 Mar 2019 00:00:00 +0000</pubDate>
+      <guid>https://threatfiltering.com/palo-alto-firewalls-configuration-management/</guid>
+      <description>&lt;h1 id=&#34;palo-alto-firewalls-configuration-management&#34;&gt;Palo Alto Firewalls Configuration Management&lt;/h1&gt;&#xA;&lt;img src=&#34;ConfigurationManagement-1.png&#34; alt=&#34;&#34;&gt;&lt;h2 id=&#34;candidate-and-running-config&#34;&gt;Candidate and Running Config&lt;/h2&gt;&#xA;&lt;p&gt;Palo Alto Firewalls are using commit-based configuration system, where the changes are not applied in the real-time as they are done via WebGUI or CLI. To apply the changes, an administrator needs either to enter commit command in CLI or to press Commit button in WebGUI.&lt;/p&gt;&#xA;&lt;p&gt;Configuration file is stored in xml format on persistent storage of the firewall. During the boot, it is loaded into memory and becomes running configuration of the device. As different settings of the firewall are applied, such as security policy or system parameter modification – candidate configuration gets changed. It resides in volatile memory and is lost during the system restart.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

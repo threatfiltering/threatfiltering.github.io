@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palo Alto Firewalls Configuration Management | Threat Filtering</title>
+
+
+<link rel="stylesheet" href="https://threatfiltering.com/css/style.css" />
+</head>
+<body>
+  <div class="mx-auto w-full max-w-7xl">
+    <header class="bg-white">
+      
+
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+            
+                <div class="text-2xl font-bold text-gray-800">
+                    <a href="/">
+                        <img src="/img/logo.png" width="181" height="92" alt="">
+                    </a>
+                </div>
+
+                
+                <div>
+                    <a href="/contact-us/" class="inline-block px-5 py-2 text-gray-700">Contact Us</a>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </header>
+    <main>
+      
+    
+
+    <div class="grid grid-cols-1 md:grid-cols-3 m3 md:m-12">
+        <div id="main-content" class="col-span-2 m-3 text-align-left font-sans text-base/relaxed tracking-wide md:border-r-gray-400 md:border-r-1 md:pr-12">
+                <h1 id="palo-alto-firewalls-configuration-management">Palo Alto Firewalls Configuration Management</h1>
+<img src="ConfigurationManagement-1.png" alt=""><h2 id="candidate-and-running-config">Candidate and Running Config</h2>
+<p>Palo Alto Firewalls are using commit-based configuration system, where the changes are not applied in the real-time as they are done via WebGUI or CLI. To apply the changes, an administrator needs either to enter commit command in CLI or to press Commit button in WebGUI.</p>
+<p>Configuration file is stored in xml format on persistent storage of the firewall. During the boot, it is loaded into memory and becomes running configuration of the device. As different settings of the firewall are applied, such as security policy or system parameter modification – candidate configuration gets changed. It resides in volatile memory and is lost during the system restart.</p>
+<p>During the commit operation, the device replaces the running configuration with the candidate config. Previous configuration is automatically archived with a timestamp added to the filename.</p>
+<blockquote>
+<p><strong>How to display running configuration of the firewall via WebGUI?</strong> In WebGUI, if the Commit button in the top-right corner is greyed out, then all the settings you see are committed and used as part of the running configuration, or Candidate Configuration == Running Configuration.</p>
+</blockquote>
+<img src="image.png" alt=""><p>If the Commit button is active, then there are some non-applied settings. The next paragraph explains how to display them.</p>
+<blockquote>
+<p><strong>How to preview non-committed changes using WebGUI?</strong> Candidate Configuration == Running Configuration + Not-Committed Changes. To see those changes, press Commit and then Preview Changes button.</p>
+</blockquote>
+<img src="image-1.png" alt=""><p>Enable Pop-Up Windows in your browser to see the configuration difference, as the Preview Changes opens a new browser window. In this example, I have created new address object, which is displayed in green in the Candidate Configuration column.</p>
+<img src="image-2.png" alt=""><blockquote>
+<p><strong>How to display non-committed changes in CLI?</strong> To display non-committed changes use the following command. The example below shows the same FQDN object created earlier and previewed in WebGUI. Statements starting with plus sign are not yet applied to the running configuration.</p>
+</blockquote>
+<pre tabindex="0"><code>&gt; show config diff
+             www.cisco.com {
+               fqdn www.cisco.com;
+             }
++            www.google.com {
++              fqdn www.google.com;
++            }
+           }
+           import {
+             network {
+</code></pre><blockquote>
+<p><strong>How to view candidate configuration in CLI?</strong> To see the candidate configuration in CLI, type-in:</p>
+</blockquote>
+<pre tabindex="0"><code>&gt; configure
+# show
+zone {
+  Untrust {
+    network {
+      layer3 ethernet1/1;
+    }
+  }
+  Trust {
+    network {
+      layer3 ethernet1/2;
+    }
+  }
+  Dmz {
+    network {
+      layer3 ethernet1/3;
+    }
+  }
+}
+</code></pre><p>This command lists current configuration in the default format.</p>
+<blockquote>
+<p><strong>How to format candidate configuration in the “set” format using CLI?</strong> More convenient way of displaying the configuration is in set-format, which can be pasted directly into the device. The output in the previous example, when displayed in set format takes only 3 lines, as shown in the following example. To view it use the following commands:</p>
+</blockquote>
+<pre tabindex="0"><code>&gt; set cli config-output-format set
+&gt; configure
+# show
+set zone Untrust network layer3 ethernet1/1
+set zone Trust network layer3 ethernet1/2
+set zone Dmz network layer3 ethernet1/3
+</code></pre><h2 id="working-with-configuration-in-pan-os">Working with Configuration in PAN-OS</h2>
+<p>The next few examples will be focusing on how to use Configuration Management in PAN-OS using WebGUI. To access Configuration Management menu navigate to Device &gt; Setup &gt; Operations.</p>
+<img src="image-3.png" alt=""><h3 id="configuration-management--internal-to-firewall">Configuration Management – Internal to Firewall</h3>
+<p>First 3 groups of commands work together to save and load configuration state checkpoints within the firewall. Load and Revert options use snapshots created by Save and Commit operations. How these options are related is shown in the screenshot below.</p>
+<img src="image-4.png" alt=""><p>First two operations that can be performed are revert-related. What is the difference reverting to:</p>
+<ul>
+<li>Running configuration</li>
+<li>Last saved configuration</li>
+</ul>
+<p>As shown in the diagram below, revert to running configuration removes all unapplied changes and in the diagram below both Change #1 and Change #2 will be discarded.</p>
+<p>If there was a candidate configuration save done between Change #1 and Change #2, then revert to last saved configuration will remove only Change #2. If there have been no candidate configuration saves, then it will revert back to the running configuration.</p>
+<img src="image-5.png" alt=""><p>Let’s start with the newly deployed VM-series PA with no changes yet applied. As a test, we will create a test FQDN address object – <a href="https://www.microsoft.com">www.microsoft.com</a>.</p>
+<img src="image-6.png" alt=""><p>Commit button is now active due to this change. Revert to last saved configuration will fail, as we haven’t saved any configuration (and no changes have been committed) just yet.</p>
+<img src="image-7.png" alt=""><p>Let’s commit the change and add the second FQDN – <a href="https://www.cisco.com">www.cisco.com</a>.</p>
+<img src="image-8.png" alt=""><p>Now let’s try to revert to last saved configuration again, this time there is no error.</p>
+<img src="image-9.png" alt=""><p>Notice that the second FQDN (<a href="https://www.cisco.com">www.cisco.com</a>) now has gone.</p>
+<img src="image-10.png" alt=""><p>Adding <a href="https://www.cisco.com">www.cisco.com</a> back and pressing “Revert to running configuration” button has the same result, i.e. the newly address is being removed.</p>
+<p>The next two options in Configuration Management are Save-related:</p>
+<ul>
+<li>Named configuration snapshot</li>
+<li>Candidate configuration</li>
+</ul>
+<blockquote>
+<p><strong>What Save named configuration snapshot option does?</strong> This option saves candidate configuration to persistent storage and as result will be available even after firewall reboot. It is convenient, when you want prepare the change, but apply it later. Note that in this scenario, care should be taken, as if there will be other changes done between preparation and applying these changes will be overwritten.</p>
+</blockquote>
+<p>I’ve added <a href="https://www.cisco.com">www.cisco.com</a> FQDN address object back and pressed “Save named configuration snapshot” button. I’ve assigned “cisco-added” name to the snapshot and pressed OK.</p>
+<img src="image-11.png" alt=""><p>By pressing Commit button and previewing changes, we can see that save snapshot doesn’t automatically commit the change.</p>
+<img src="image-12.png" alt=""><p>To see the list of saved snapshots in WebGUI click on Load named configuration snapshot link in Configuration Management page, which will display available checkpoints.</p>
+<img src="image-13.png" alt=""><p>After device restart, the named snapshot is still available. CLI command to display list of saved configuration files is:</p>
+<pre tabindex="0"><code>&gt; show config saved 
+  candidate-config     candidate-config
+  cisco-added          2019/03/19 03:28:10        9.2K
+  running-config.xml   2019/03/19 03:40:36        9.1K
+  &lt;value&gt;              Saved configuration
+</code></pre><blockquote>
+<p><strong>What Save candidate configuration option does?</strong> This option provides ability to save a single snapshot of candidate configuration into RAM. It is similar to Undo command in Windows Notepad (with only single last action rollback). Use cases for this command is when you create a complex change and want to be able to go back to a previous version of non-applied config.</p>
+</blockquote>
+<p>To demonstrate how it works, two changes will be created with save in between. I will start with adding new FQDN object – <a href="https://www.fortinet.com">www.fortinet.com</a>.</p>
+<img src="image-14.png" alt=""><p>Then let’s press save candidate configuration link. Important to note that this command doesn’t commit the change.</p>
+<img src="image-15.png" alt=""><p>Let’s now add another FQDN object – <a href="https://www.google.com">www.google.com</a>.</p>
+<img src="image-16.png" alt=""><p>To test the behaviour I pressed Revert to last saved configuration.</p>
+<img src="image-17.png" alt=""><p>As the result of this action, the second change object has now gone.</p>
+<img src="image-18.png" alt=""><blockquote>
+<p><strong>What does Load configuration version link do?</strong> This option provides automatic rollback to previously auto-saved configuration. Each commit generates a new version of the configuration. This is very convenient feature in situations when you need to perform a rollback of a commit.</p>
+</blockquote>
+<p>As shown in the screenshot below, the more recent configuration versions are placed on the top.</p>
+<img src="image-19.png" alt=""><h3 id="configuration-management--external-to-firewall">Configuration Management – External to Firewall</h3>
+<p>The last 2 group of commands allow configuration files to be transferred between the firewall and administrator PC.</p>
+<p>As shown in the screenshot below, there are 5 commands available under Export and Import sections.</p>
+<img src="image-20.png" alt=""><p>Export provides the way to extract information from the firewall. First option, “Export named configuration snapshot” allows downloading of candidate and running config, as well as snapshots you create using “Save named configuration snapshot” option. The next screenshot shows available options. Downloaded file is in XML format and can be imported (or uploaded) using “Import named configuration snapshot” link.</p>
+<img src="image-21.png" alt=""><p>The second option, “Export configuration version” extracts the selected auto-saved configuration, as shown in the screenshot below. It can be useful for off-the box archival purposes.</p>
+<img src="image-22.png" alt=""><p>“Export device state” exports not only configuration, but also dynamic information for GlobalProtect Portal with large scale VPN feature. The file is an archive (tgz).</p>
+<blockquote>
+<p><strong>Does configuration export contain certificate, private keys and pre-shared keys?</strong> Yes. You can use restored keys and certificates, however, they cannot be displayed in clear-text.</p>
+</blockquote>
+<blockquote>
+<p><strong>Is it possible to restore configuration on another device?</strong> Yes. The configuration is not automatically committed, so there is an option to edit configuration prior to applying it to the firewall.</p>
+</blockquote>
+
+
+                
+                <div class="mt-9">
+                    
+                    
+                    <nav class="inline-grid grid-cols-4 space-x-2.5 w-full justify-center pt-5">
+
+                        
+
+                        
+                        <a class="text-center col-start-3 py-2 px-3 rounded font-medium select-none border text-gray-900  bg-white dtransition-colors hover:border-gray-400 hover:bg-gray-700 hover:text-white "
+                            href="/packet-flow-and-order-of-operations-in-pan-os/">
+                            Next > </a>
+                        
+                    </nav>
+
+                </div>
+                
+
+
+
+        </div>
+        
+        <div class="mt-6 ml-6">
+
+                <h2 class="mb-5">Categories:</h2>
+                <ul class="text-cyan-500">
+                    
+                        <li class="mb-1"><a href="/category/cisco/">Cisco</a></li>
+                    
+                        <li class="mb-1"><a href="/category/cisco-asa/">Cisco ASA</a></li>
+                    
+                        <li class="mb-1"><a href="/category/palo-alto/">Palo Alto</a></li>
+                    
+                        <li class="mb-1"><a href="/category/pki/">PKI</a></li>
+                    
+                </ul>
+                <br>
+
+                
+                <br>
+                
+                <h2 class="mb-5">Recent posts:</h2>
+                <ul class="text-cyan-500">
+                    
+                        <li><a class="mb-1" href="/cisco-firewall-models-and-performance/">Cisco Firewall Models and Performance</a></li>
+                    
+                        <li><a class="mb-1" href="/cisco-zone-based-firewall-configuration-step-by-step-part-2/">Cisco Zone Based Firewall Configuration Step By Step Part 2</a></li>
+                    
+                        <li><a class="mb-1" href="/cisco-zone-based-firewall-configuration-step-by-step-part-1/">Cisco Zone Based Firewall Configuration Step By Step Part 1</a></li>
+                    
+                        <li><a class="mb-1" href="/install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls/">Install SSL certificate on Palo Alto Networks or Cisco ASA Firewalls</a></li>
+                    
+                        <li><a class="mb-1" href="/site-to-site-vpns-on-palo-alto-network-firewalls/">Site-To-Site VPNs on Palo Alto Networks Firewalls</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    </main>
+    <footer class="pt-24 text-center text-sm">
+          
+            <a href="/privacy-policy" style="text-decoration:none;" class="link-dark">Privacy Policy</a> - 
+            <a href="/terms-and-conditions" style="text-decoration:none;" class="link-dark">Terms and Conditions</a></p>
+            <p class="text-dark">Copyright &copy; 2025 threatfiltering.net</p>
+
+    </footer>
+  </div>
+</body>
+</html>

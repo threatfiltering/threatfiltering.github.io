@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en-us" dir="ltr">
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install SSL certificate on Palo Alto Networks or Cisco ASA Firewalls | Threat Filtering</title>
+
+
+<link rel="stylesheet" href="https://threatfiltering.com/css/style.css" />
+</head>
+<body>
+  <div class="mx-auto w-full max-w-7xl">
+    <header class="bg-white">
+      
+
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+            
+                <div class="text-2xl font-bold text-gray-800">
+                    <a href="/">
+                        <img src="/img/logo.png" width="181" height="92" alt="">
+                    </a>
+                </div>
+
+                
+                <div>
+                    <a href="/contact-us/" class="inline-block px-5 py-2 text-gray-700">Contact Us</a>
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </header>
+    <main>
+      
+    
+
+    <div class="grid grid-cols-1 md:grid-cols-3 m3 md:m-12">
+        <div id="main-content" class="col-span-2 m-3 text-align-left font-sans text-base/relaxed tracking-wide md:border-r-gray-400 md:border-r-1 md:pr-12">
+                <h1 id="install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls">Install SSL certificate on Palo Alto Networks or Cisco ASA Firewalls</h1>
+<h2 id="overview">Overview</h2>
+<p>Firewalls require SSL certificates in one of the following scenarios:</p>
+<ul>
+<li>Secure management WebGUI access</li>
+<li>Provide SSL-based remote VPN</li>
+<li>Perform peer authentication to establish Site-To-Site VPN tunnels</li>
+</ul>
+<p>Administrator’s tasks include obtaining a certificate either through public or enterprise Certificate Authority, certificate renewal and ensuring that the private key is safe and backed up.</p>
+<p>This article describes basic concepts of a SSL certificate and step-by-step instruction on how to obtain SSL certificate, back it up and restore if the device fail.</p>
+<p>Diagram below shows steps required to obtain a SSL certificate.</p>
+<img src="image.png" alt="" class="img-fluid py-4"><p>Installation process starts with generation of a key pair.</p>
+<blockquote>
+<p><strong>What is a private and public key?</strong></p>
+</blockquote>
+<p>Asymmetric cryptography algorithm, in contrast to symmetric one, requires two different keys to encrypt and decrypt a message. Private key should be kept in secret and public one can be freely distributed.</p>
+<p>Public key is derived using mathematical function from private key. Together they form a key pair.</p>
+<p>Two algorithms supported by both ASA and Palo Alto firewalls are RSA (mature) and ECDSA (Elliptic Curve, more efficient).</p>
+<h2 id="step-1-generate-a-key-pair">Step 1. Generate a key pair</h2>
+<h3 id="asa-firewall-using-asdm">ASA firewall using ASDM</h3>
+<p>The process of generating a key pair on ASA in ASDM is initiated via Identity Certificate menu. Navigate to <code>Configuration &gt; Device Management &gt; Certificate Management &gt; Identity Certificates</code> and press Add button.</p>
+<img src="image-1.png" alt="" class="img-fluid py-4"><p>As shown in the screenshot above, a key pair named <code>&lt;Default-RSA-Key&gt;</code> is selected by default. Press New button next to Key Pair name to create either RSA or ECDSA key. See the figure below with RSA new key pair being created.</p>
+<img src="image-2.png" alt="" class="img-fluid py-4"><h3 id="asa-firewall-using-cli">ASA firewall using CLI</h3>
+<p>Select algorithm to use:</p>
+<pre tabindex="0"><code>ASA01(config)# crypto key generate ?
+configure mode commands/options:
+   ecdsa  Generate ECDSA keys
+   rsa    Generate RSA keys
+</code></pre><p>Example of RSA keys generation:</p>
+<pre tabindex="0"><code>ASA01(config)# crypto key generate rsa ?
+configure mode commands/options:
+   general-keys  Generate a general purpose RSA key pair for signing and
+                 encryption
+   label         Provide a label
+   modulus       Provide number of modulus bits on the command line
+   noconfirm     Specify this keyword to suppress all interactive prompting.
+   usage-keys    Generate separate RSA key pairs for signing and encryption
+   
+ ASA01(config)# crypto key generate rsa general-keys label TFKeyPair modulus ?
+ configure mode commands/options:
+   1024  1024 bits
+   2048  2048 bits
+   4096  4096 bits
+   512   512 bits
+   768   768 bits
+ ASA01(config)# crypto key generate rsa general-keys label TFKeyPair modulus 2048
+ INFO: The name for the keys will be: TFKeyPair
+ Keypair generation process begin. Please wait…
+</code></pre><p>Example of ECDSA keys generation:</p>
+<pre tabindex="0"><code>ASA01(config)# crypto key generate ecdsa label TFKeyPair-ECDSA ?
+configure mode commands/options:
+  elliptic-curve  Choose the Elliptic Curve
+  noconfirm       Specify this keyword to suppress all interactive prompting.
+  
+ASA01(config)# crypto key generate ecdsa label TFKeyPair-ECDSA elliptic-curve ?
+configure mode commands/options:
+  256  256 bits
+  384  384 bits
+  521  521 bits
+ASA01(config)# crypto key generate ecdsa label TFKeyPair-ECDSA elliptic-curve 521                      
+INFO: The name for the keys will be: TFKeyPair-ECDSA
+Keypair generation process begin. Please wait…
+</code></pre><p>Use this command to display list of keypairs. To extract private key, you will need to export it together with identity certificate in PKCS#12 format (this will be demonstrated in Step 5):</p>
+<pre tabindex="0"><code>ASA01# show crypto key mypubkey rsa 
+Key pair was generated at: 12:17:57 GMT Jun 18 2019.
+Key name: TFKeyPair
+ Usage: General Purpose Key
+ Modulus Size (bits): 2048
+ Storage: config
+ Key Data:
+30820122 300d0609 2a864886 f70d0101 01050003 82010f00 3082010a 02820101 
+  00d76663 f541db49 3a7c96bc ee5c8266 f411a0c4 65327846 ed2c5c61 89b04576 
+  5a306d0e ec18e3d4 b8545961 50d8bdb8 e58a76a3 9acf028f 82f9c8e6 78d42389 
+  ef0ba0a4 a0c71881 fdb300b9 dd4d0bd2 2b884403 4998839f 70fc79de fbcf5b37 
+  446a68fc 6012b986 4d4a690b 20684231 fd388c6c 1619bac9 1aedba9f a1602dea 
+  56907c8b 887477c5 e3e9e590 6f5f429f 15ece9f4 cf64d98b d94ad783 7d5fac83 
+  e58bfd7c ee43894a 8d7b6730 092dff7e 35bda58a 9e606d26 456079ee b6348dcc 
+  70a0f535 5033f1e1 889f52ae 56d126d2 64335ec4 625cddea 4103b8ca 5c8aa0e5 
+  1c086062 a764f63c d011a2a5 e07ab69c af03ee5e a90c10dc cb125f95 030a870e 
+  f1020301 0001
+</code></pre><h3 id="palo-alto-firewall">Palo Alto Firewall</h3>
+<p>Key pair in Palo Alto firewall cannot be generated without creating a CSR, so it will be covered as part of the Step 2.</p>
+<h2 id="step-2-create-a-csr">Step 2. Create a CSR</h2>
+<blockquote>
+<p><strong>What is PKCS?</strong></p>
+</blockquote>
+<p>Public-Key Cryptography Standards are published by RSA Labs. Some of these standards are around cryptography implementation and some define formats of the message containers, for example:</p>
+<ul>
+<li>PKCS#7 – is container for certificates used to distribute certificates</li>
+<li>PKCS#10 – defines how CSR must be formatted</li>
+<li>PKCS#12 – contains certificate, private key and CA certificate. It is used to backup and move identity certificates between systems. To secure private key PKCS#12 requires password protection.</li>
+</ul>
+<h3 id="asa-firewall-using-asdm-1">ASA firewall using ASDM</h3>
+<blockquote>
+<p><strong>What is Trustpoint in ASA?</strong></p>
+</blockquote>
+<p>Trustpoints is a certificate in ASA’s terminology. It can represent identity certificate, in which case it will have corresponding private key. Or it can be CA’s certificate.</p>
+<p>After completing Step 1 in ASDM, type-in locally significant Trustpoint name, as shown in the figure below.</p>
+<img src="image-3.png" alt="" class="img-fluid py-4"><p>Instead of typing Certificate Subject DN, press Select button and add required attributes. See the screenshot below with the number of attributes filled-in.</p>
+<img src="image-4.png" alt="" class="img-fluid py-4"><p>Press OK to close the window and then Add Certificate button. Press Advanced button and type-in FQDN to match common name. By default, it will be set-up to the actual hostname of the firewall, which may or not may not be URL your users trying to use when reaching SSL VPN or management interface of the firewall.</p>
+<p>If it differs from common name, the FQDN will be added as Subject Alternative Name (SAN) of the certificate.</p>
+<img src="image-5.png" alt="" class="img-fluid py-4"><p>Pop-up window will be shown prompting for a location to save CSR request. This file will be used later to send request to CA.</p>
+<img src="image-6.png" alt="" class="img-fluid py-4"><p>It is a ASCII (Base64) encoded as shown in the screenshot below:</p>
+<img src="image-7.png" alt="" class="img-fluid py-4"><p>The certificate is now in pending state waiting for CA to approve and sign it.</p>
+<img src="image-8.png" alt="" class="img-fluid py-4"><h3 id="asa-firewall-using-cli-1">ASA firewall using CLI</h3>
+<p>The following configuration achieves the same result as ASDM-based configuration.</p>
+<pre tabindex="0"><code>ASA01(config)# crypto ca trustpoint TF-TrustPoint
+ASA01(config-ca-trustpoint)# enrollment terminal
+ASA01(config-ca-trustpoint)# fqdn vpn.threatfiltering.com
+ASA01(config-ca-trustpoint)# subject-name CN=vpn.threatfiltering.com,C=US,St=California,L=San Francisco
+ASA01(config-ca-trustpoint)# keypair TFKeyPair
+ASA01(config-ca-trustpoint)# crl configure
+ASA01(config-ca-crl)# exit
+</code></pre><p>To display CSR in the console window see example in the listing below.</p>
+<pre tabindex="0"><code>ASA01(config)# crypto ca enroll TF-TrustPoint 
+WARNING: The certificate enrollment is configured with an fqdn
+ that differs from the system fqdn. If this certificate will be
+ used for VPN authentication this may cause connection problems.
+ Would you like to continue with this enrollment? [yes/no]: yes
+ % Start certificate enrollment .. 
+ % The subject name in the certificate will be: CN=vpn.threatfiltering.com,C=US,St=California,L=San Francisco
+ % The fully-qualified domain name in the certificate will be: vpn.threatfiltering.com
+ % Include the device serial number in the subject name? [yes/no]: no
+ Display Certificate Request to terminal? [yes/no]: yes
+ Certificate Request follows:
+ -----BEGIN CERTIFICATE REQUEST-----
+ MIIDDzCCAfcCAQAwgYQxFjAUBgNVBAcTDVNhbiBGcmFuY2lzY28xEzARBgNVBAgT
+ CkNhbGlmb3JuaWExCzAJBgNVBAYTAlVTMSAwHgYDVQQDExd2cG4udGhyZWF0Zmls
+ dGVyaW5nLmNvbTEmMCQGCSqGSIb3DQEJAhYXdnBuLnRocmVhdGZpbHRlcmluZy5j
+ b20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDXZmP1QdtJOnyWvO5c
+ gmb0EaDEZTJ4Ru0sXGGJsEV2WjBtDuwY49S4VFlhUNi9uOWKdqOazwKPgvnI5njU
+ I4nvC6CkoMcYgf2zALndTQvSK4hEA0mYg59w/Hne+89bN0RqaPxgErmGTUppCyBo
+ QjH9OIxsFhm6yRrtup+hYC3qVpB8i4h0d8Xj6eWQb19CnxXs6fTPZNmL2UrXg31f
+ rIPli/187kOJSo17ZzAJLf9+Nb2lip5gbSZFYHnutjSNzHCg9TVQM/HhiJ9SrlbR
+ JtJkM17EYlzd6kEDuMpciqDlHAhgYqdk9jzQEaKl4Hq2nK8D7l6pDBDcyxJflQMK
+ hw7xAgMBAAGgRTBDBgkqhkiG9w0BCQ4xNjA0MA4GA1UdDwEB/wQEAwIFoDAiBgNV
+ HREEGzAZghd2cG4udGhyZWF0ZmlsdGVyaW5nLmNvbTANBgkqhkiG9w0BAQUFAAOC
+ AQEAg8JLPKT8DSLA69Ix/zf03p12tPd13Mw9mcBFIxiLYp46+bQxwxPgy4Tv4DOo
+ 7y9E9SGXEQ8hdJyTzO+L62AbiYpozPhGi9iIoHrprqCrRLKvdoip8kaJ25nsrfT0
+ X4L2YTOtqmC9lg1I9lUwEu8iRSg2fUMlvwqpaWpQ2HNWVPoxtPgX4QpPWkwuBamu
+ kiskzVFOmMj8wJLm9GvhDv3kxq0xDXs4ta8cey02KFd+WXFnKmkf8vPFWrwrP5up
+ QLRbW+QVG4KCJfA0Yf7434oG9Jm7ps/6Vk9IPdUNNK43Ntz/ZvXQ2j0cd/DFhfuf
+ iR5/XEosM0gC67osZoN0AFaMhQ==
+ -----END CERTIFICATE REQUEST-----
+</code></pre><h3 id="palo-alto-firewall-using-webgui">Palo Alto Firewall using WebGUI</h3>
+<p>Log-in into WebGUI and click on the Device tab. Then select <code>Certificate Management &gt; Certificates</code> menu on the left. Then click Generate button located on the bottom menu.</p>
+<p>Configuration menu is shown below and has familiar options, such as certificate common name and cryptographic settings for key pair, such as RSA or ECDSA.</p>
+<p>PAN-OS WebGUI doesn’t provide option to separately generate a key pair.</p>
+<img src="image-9.png" alt="" class="img-fluid py-4"><p>Press Generate button and certificate will appear in the list. Notice that Key checkbox is selected, as we have private key corresponding to this certificate. To export CSR click on the certificate and then press Export Certificate button (yes, it exports CSR for not issued certificates).</p>
+<img src="image-10.png" alt="" class="img-fluid py-4"><h3 id="palo-alto-firewall-using-cli">Palo Alto Firewall using CLI</h3>
+<p>See the listing below with the command required to generate CSR.</p>
+<pre tabindex="0"><code>admin@PA&gt; request certificate generate 
+ ca                   Make this a signing certificate
+ country-code         Country code
+ days-till-expiry     Number of days till expiry
+ digest               Digest Algorithm
+ email                Email address of the contact person
+ filename             file name for the certificate
+ locality             Locality
+ ocsp-responder-url   ocsp-responder-url 
+ organization         Organization
+ signed-by            signed-by 
+ state                State/province
+ algorithm            algorithm 
+ certificate-name     Name of the certificate object
+ name                 IP or FQDN to appear on the certificate 
+   alt-email            Subject alternate Email type
+   hostname             Subject alternate name DNS type
+   ip                   Subject alternate name IP type
+   organization-unit    Department 
+ admin@PA&gt; request certificate generate country-code US state California locality &#34;San Francisco&#34; name vpn.threatfiltering.com algorithm RSA 
+ rsa-nbits          Length of the key
+ certificate-name   Name of the certificate object 
+ admin@PA&gt; request certificate generate country-code US state California locality &#34;San Francisco&#34; name vpn.threatfiltering.com algorithm RSA rsa-nbits 
+   1024     1024
+   2048     2048
+   3072     3072
+   4096     4096
+   512      512
+     Length of the key
+ admin@PA&gt; request certificate generate country-code US state California locality &#34;San Francisco&#34; signed-by external name vpn.threatfiltering.com algorithm RSA rsa-nbits 2048 certificate-name TF-VPN-CLI
+ Successfully generated certificate and key pair : TF-VPN-CLI
+</code></pre><p>To download CSR, use of WebGUI is still required as described in the previous section.</p>
+<h2 id="step-3-certificate-authority-approval">Step 3. Certificate Authority approval</h2>
+<p>I will be using Windows 2012 R2 Certificate Authority server to issue certificates. The end result of this step is a signed certificate that we can install on the firewall.</p>
+<p>The process of obtaining certificate from public CA is generally simpler, as you are not required to set up your own CA. You will be required to perform domain ownership verification by either creating a TXT entry in DNS zone or approving email sent to Whois contact for the domain name.</p>
+<p>CSR needs to be uploaded for CA to process. Once the certificate is issued the links will be made available for downloading certificate and corresponding CA certification chain.</p>
+<p>The screenshots for Windows CA setup follow. Note that all steps that require only pressing Next and don’t have any relevant information are omitted.</p>
+<p>Click on “Add roles and features” link in the quick start:</p>
+<img src="image-11.png" alt="" class="img-fluid py-4"><p>Select Active Directory Certificate Services (accept all pre-requisite installation prompts):</p>
+<img src="image-12.png" alt="" class="img-fluid py-4"><p>Add Certification Authority Web Enrollment role service (accept all pre-requisite installation prompts):</p>
+<img src="image-13.png" alt="" class="img-fluid py-4"><p>Once installation is completed first click on Tasks Flag and then on Configure Active Directory Certificate Services link.</p>
+<img src="image-14.png" alt="" class="img-fluid py-4"><img src="image-15.png" alt="" class="img-fluid py-4"><p>As our server is not part of Active Directory domain, only Standalone CA option is available.</p>
+<img src="image-16.png" alt="" class="img-fluid py-4"><p>Root CA is selected, as this is the first and only Certificate Authority server we will be using in this example.</p>
+<img src="image-17.png" alt="" class="img-fluid py-4"><p>Create a new private key for CA. This key (as any private key) must be protected in production environment.</p>
+<img src="image-18.png" alt="" class="img-fluid py-4"><p>Select 2048 key length and SHA512 as the hash algorithm.</p>
+<img src="image-19.png" alt="" class="img-fluid py-4"><p>Select Common Name for the CA. In this lab environment, I’ve just used the host name of the server.</p>
+<img src="image-20.png" alt="" class="img-fluid py-4"><img src="image-21.png" alt="" class="img-fluid py-4"><img src="image-22.png" alt="" class="img-fluid py-4"><img src="image-23.png" alt="" class="img-fluid py-4"><img src="image-24.png" alt="" class="img-fluid py-4"><p>Now, it’s time to request the certificate using Web enrollment. Open a browser on the server we’ve just installed CA role and use the following URL. It is HTTP-based, which you wouldn’t use in production, but for lab it should be ok.</p>
+<p><code>http://localhost/certsrv</code></p>
+<p>Click on “Request a certificate” link.</p>
+<img src="image-25.png" alt="" class="img-fluid py-4"><p>Then select “advanced certificate request” link, as we have all required information encoded in CSR.</p>
+<img src="image-26.png" alt="" class="img-fluid py-4"><p>Paste CSR content into the request field.</p>
+<img src="image-27.png" alt="" class="img-fluid py-4"><p>With public Certificate Authority, checks will start at this stage and you would have to perform validation steps required by the selected CA. In our case, we will use the procedure below to approve the request.</p>
+<img src="image-28.png" alt="" class="img-fluid py-4"><p>Navigate to <code>Administrative Tools &gt; Certification Authority</code>.</p>
+<img src="image-29.png" alt="" class="img-fluid py-4"><p>Pending Requests will contain the certificate that we need to approve.</p>
+<img src="image-30.png" alt="" class="img-fluid py-4"><p>Select the certificate and navigate to the following menu: <code>Action &gt; All Tasks &gt; Issue</code>.</p>
+<p>Return back to the web browser, but this time press on “View the status of a pending certificate request”.</p>
+<img src="image-31.png" alt="" class="img-fluid py-4"><p>Select the certificate request.</p>
+<img src="image-32.png" alt="" class="img-fluid py-4"><p>Select Base64 and click “Download certificate” link.</p>
+<img src="image-33.png" alt="" class="img-fluid py-4"><p>The browser will download the file in .CER format. This is the identity certificate. I used CSR generated on ASA and for PA firewall, I will go through the process again, but will paste Palo Alto’s request instead.</p>
+<p>Go back to the CA’s starting page (3rd screenshot above), and select “Download a CA certificate, certificate chain, or CRL”.</p>
+<img src="image-34.png" alt="" class="img-fluid py-4"><p>Select Base 64 encoding and then “Download CA certificate” link. This is CA certificate that we will use on the firewalls in the next step. This certificate will need to be placed into Trusted Root on all PCs, so they can trust ASA or PA’s certificates. If public certificate authority is used, this step already performed either by browser or operating system vendor.</p>
+<h2 id="step-4-install-certificate-on-the-firewall">Step 4. Install Certificate on the Firewall</h2>
+<h3 id="asa-firewall-using-asdm-2">ASA Firewall using ASDM</h3>
+<p>We will start installation with uploading CA certificate first. Click on Configuration Tab of ASDM and then select Device Management in tabbed menu on the left.</p>
+<p>Navigate to <code>Certificate Management &gt; CA Certificate</code>. See the screenshot details below.</p>
+<p>As it is not identity certificate, no private key generation is required. CA stores it’s private key and we just need it’s public key which is embedded in certificate.</p>
+<img src="image-35.png" alt="" class="img-fluid py-4"><p>The second part of the process is installation of the firewall’s identity certificate. Navigate to C<code>ertificate Management &gt; Identity Certificates</code>. Finalize installation by selecting pending certificate and clicking Install button.</p>
+<img src="image-36.png" alt="" class="img-fluid py-4"><p>Select the file location or paste it in Base-64 text format. Press Install Certificate button.</p>
+<img src="image-37.png" alt="" class="img-fluid py-4"><p>Validate that installation was successful by checking that all fields, such as Issued By and Expiry Date are now populated.</p>
+<img src="image-38.png" alt="" class="img-fluid py-4"><h3 id="asa-firewall-using-cli-2">ASA Firewall using CLI</h3>
+<p>Will start installation with CA certificate in similar way as in ASDM. Define a trustpoint (or certificate) for CA.</p>
+<pre tabindex="0"><code>ASA01(config)# crypto ca trustpoint CA-DEV 
+ASA01(config-ca-trustpoint)# enrollment terminal 
+ASA01(config-ca-trustpoint)# crl configure
+ASA01(config-ca-crl)# exit
+ASA01(config-ca-trustpoint)# exit
+</code></pre><p>Type the following command and paste-in your CA certificate.</p>
+<pre tabindex="0"><code>ASA01(config)# crypto ca authenticate CA-DEV
+Enter the base 64 encoded CA certificate.
+End with the word &#34;quit&#34; on a line by itself
+-----BEGIN CERTIFICATE-----
+MIIC/zCCAeegAwIBAgIQI0h0kVE81pFGq5ymDiDcizANBgkqhkiG9w0BAQ0FADAS
+MRAwDgYDVQQDEwdERVYyLUNBMB4XDTE5MDYxODExNDgwOVoXDTI0MDYxODExNTgw
+OVowEjEQMA4GA1UEAxMHREVWMi1DQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC
+AQoCggEBAKhcMUnYIbgdbhA6OaEYUeAHjgcl/xrGyGm6ClJ80sPoxi6MJrk2/Ejr
+kFJ48YkWpGVzni6mCMWZzXrG6JgI0CZrV9/DG0G9dgMaDwDKRZqOqd5PVxGr5Okz
+tCr9lQET+isXaoVB6ugz0zrgcL3kLsiRQ1rDrqF9fQOavBMlNfTE16v6HxRkkswz
+CY98SBhPervcn4J86VF6Rz0O5wZ7AVxta2d3AUXnHNkXI0zT6grdQZiciMNUEDBP
+K7XWZ+xnLZBW+sXUXMYJmFxgja1fJkD4r43T1Ye7e719e8gtW+utdbUHoLd9q7rr
+Px++m/73+XOjQVSCU604e095r7TmiikCAwEAAaNRME8wCwYDVR0PBAQDAgGGMA8G
+A1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFPXgrKF+VIErE2UL3J5pI9g8CYpBMBAG
+CSsGAQQBgjcVAQQDAgEAMA0GCSqGSIb3DQEBDQUAA4IBAQANnNkhB8gZGPMTvbFT
+ZWORcO7946iPY2ouZN1rycx79f908SAqJlEZgBJprIy1hoK7+6dOlRSRsFMog9i2
+5AyPCgor3Gftk0yoIZfxHwge5SeO3xlq6qfpUmM3BDqkpLyj8UpmX0VAXfkBr5pp
+upMdeMIM+wT4AOLfuSWnln8FKWANuqN6ctPlIHJye2hI9htfrUuw52w64W8TSmjz
+Aw5GExGI9TyYrWKF+bORrQfPk2MYBi+5PdQeCukRrsYife0V8FW8rDP7MHCN6Dgf
+aBMgnVvILadHEqcHKyj+x8f6JRIMXUuKcoviZfQnAguj5B7UrlNXi76zB2MGL8Lt
+SUTI
+-----END CERTIFICATE-----
+quit
+INFO: Certificate has the following attributes:
+Fingerprint:     f60006bf 3c11022f 76d294f9 2b9de905 
+Do you accept this certificate? [yes/no]: yes
+Trustpoint CA certificate accepted.
+% Certificate successfully imported
+ASA01(config)#
+</code></pre><p>Now it’s time to install identity certificate. Type in-the command referencing identity trustpoint you created in the Step 2, press Enter and then paste-in Base-64 text from the certificate. As per instruction, type word “quit” on a separate line to signal the end of the certificate.</p>
+<pre tabindex="0"><code>ASA01(config)# crypto ca import TF-TrustPoint certificate
+Enter the base 64 encoded CA certificate.
+ End with the word &#34;quit&#34; on a line by itself
+ -----BEGIN CERTIFICATE-----      
+ MIID6TCCAtGgAwIBAgITIAAAAAObg0Pn4qnKjgAAAAAAAzANBgkqhkiG9w0BAQ0F
+ ADASMRAwDgYDVQQDEwdERVYyLUNBMB4XDTE5MDYyMDEwNDc0NloXDTIwMDYyMDEw
+ NTc0NlowRDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExIDAeBgNV
+ BAMTF3Zwbi50aHJlYXRmaWx0ZXJpbmcuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOC
+ AQ8AMIIBCgKCAQEA12Zj9UHbSTp8lrzuXIJm9BGgxGUyeEbtLFxhibBFdlowbQ7s
+ GOPUuFRZYVDYvbjlinajms8Cj4L5yOZ41COJ7wugpKDHGIH9swC53U0L0iuIRANJ
+ mIOfcPx53vvPWzdEamj8YBK5hk1KaQsgaEIx/TiMbBYZuska7bqfoWAt6laQfIuI
+ dHfF4+nlkG9fQp8V7On0z2TZi9lK14N9X6yD5Yv9fO5DiUqNe2cwCS3/fjW9pYqe
+ YG0mRWB57rY0jcxwoPU1UDPx4YifUq5W0SbSZDNexGJc3epBA7jKXIqg5RwIYGKn
+ ZPY80BGipeB6tpyvA+5eqQwQ3MsSX5UDCocO8QIDAQABo4IBBDCCAQAwDgYDVR0P
+ AQH/BAQDAgWgMCIGA1UdEQQbMBmCF3Zwbi50aHJlYXRmaWx0ZXJpbmcuY29tMB0G
+ A1UdDgQWBBSoWo/rPC0bzvEcF9yfjVcnRsvUzjAfBgNVHSMEGDAWgBT14KyhflSB
+ KxNlC9yeaSPYPAmKQTA1BgNVHR8ELjAsMCqgKKAmhiRmaWxlOi8vLy9ERVYyL0Nl
+ cnRFbnJvbGwvREVWMi1DQS5jcmwwRQYIKwYBBQUHAQEEOTA3MDUGCCsGAQUFBzAC
+ hilmaWxlOi8vLy9ERVYyL0NlcnRFbnJvbGwvREVWMl9ERVYyLUNBLmNydDAMBgNV
+ HRMBAf8EAjAAMA0GCSqGSIb3DQEBDQUAA4IBAQAG0rLhOBOMK7xY6c5JXadI0C5S
+ ugjdlqyZ8A5RQARNELyeMMTSSI+CTqQ+UrLD+QNe5EL0N8Gx6OMKut12kWdm/GPH
+ NmFDKHmYxVox35gj3p/m3pmi7SnwBLfD+d3N+6+OXXgyJC8YqoWXljx6RWQH1+GQ
+ lwkpnFSj3XGDsxgwizAe6XKYpQzf/PHWj0W8IS2dS1xWbKnFStRltNgQOOdOyCTx
+ XGEX277epdZYks/6e9u62kh84b62jQet7ffAOc0A9X6wHzTEK6amysz+8WkZ8UL+
+ 7IP7IcO8Jzs3xqJW0O5N+GHeCd7duuxYVT6ph3mrXeZbc+0byYjtAiCjNJ0c
+ -----END CERTIFICATE-----
+ quit
+ INFO: Certificate has the following attributes:
+ Fingerprint:     07f39730 cd50a849 dac1c9c4 73ce6e81 
+ Do you accept this certificate? [yes/no]: yes
+ Certificate validated - Signed by existing trustpoint CA certificate.
+ Trustpoint CA certificate accepted.
+ % Certificate successfully imported
+</code></pre><p>Use the following show command to see list of installed certificates (note that identity certificate doesn’t have CA prepended):</p>
+<pre tabindex="0"><code>ASA01# show crypto ca certificates 
+Certificate
+  Status: Available
+  Certificate Serial Number: 20000000039b8343e7e2a9ca8e000000000003
+  Certificate Usage: General Purpose
+  Public Key Type: RSA (2048 bits)
+  Signature Algorithm: SHA512 with RSA Encryption
+  Issuer Name: 
+    cn=DEV2-CA
+  Subject Name:
+    cn=vpn.threatfiltering.com
+    st=California
+    c=US
+  CRL Distribution Points: 
+    [1]  file:////DEV2/CertEnroll/DEV2-CA.crl
+  Validity Date: 
+    start date: 10:47:46 GMT Jun 20 2019
+    end   date: 10:57:46 GMT Jun 20 2020
+  Storage: config
+  Associated Trustpoints: TF-TrustPoint 
+CA Certificate
+  Status: Available
+  Certificate Serial Number: 23487491513cd69146ab9ca60e20dc8b
+  Certificate Usage: Signature
+  Public Key Type: RSA (2048 bits)
+  Signature Algorithm: SHA512 with RSA Encryption
+  Issuer Name: 
+    cn=DEV2-CA
+  Subject Name: 
+    cn=DEV2-CA
+  Validity Date: 
+    start date: 11:48:09 GMT Jun 18 2019
+    end   date: 11:58:09 GMT Jun 18 2024
+  Storage: config
+  Associated Trustpoints: CA-DEV
+</code></pre><h3 id="palo-alto-firewall-using-webgui-1">Palo Alto Firewall using WebGUI</h3>
+<p>PAN-OS WebGUI doesn’t split certificate menu for identity and CA certificates, so the process is similar for both certs. Navigate to <code>Device &gt; Certificate Management &gt; Certificates</code>. Identity certificates are nested under CA certificates which provides nice hierarchical view of the chain. The end result will look like in the screenshot below.</p>
+<img src="image-39.png" alt="" class="img-fluid py-4"><p>In the Step 2 we had CSR prepared. To continue click on the Import button as shown above. Enter certificate name (as typed-in in Step 2) and path to the file.</p>
+<img src="image-40.png" alt="" class="img-fluid py-4"><p>Then add CA certificate. Click on Import button on the bottom toolbar.</p>
+<img src="image-41.png" alt="" class="img-fluid py-4"><h3 id="palo-alto-firewall-using-cli-1">Palo Alto Firewall using CLI</h3>
+<p>Doesn’t seem to be possible as of 8.1.0.</p>
+<h2 id="identity-certificate-backup">Identity Certificate Backup</h2>
+<p>To export certificate along with it’s private key, PKCS#12 container is used on both firewalls.</p>
+<h3 id="asa-firewall-using-asdm-3">ASA Firewall using ASDM</h3>
+<p>Navigate to <code>Configuration &gt; Device Management &gt; Certificate Management &gt; Identity Certificates</code> and select the certificate you want to backup. Press Export button.</p>
+<img src="image-42.png" alt="" class="img-fluid py-4"><p>Type-in the file name to store it on the computer ASDM is launched from and select encryption passphrase. Use P12 extension, as Windows will recognize this as PKCS12 certificate.</p>
+<h3 id="asa-firewall-using-cli-3">ASA Firewall using CLI</h3>
+<p>Using CLI, type-in the following command. Cisco123 is the secret passphrase to secure the private key.</p>
+<pre tabindex="0"><code>ASA01(config)# crypto ca export TF-TrustPoint pkcs12 Cisco123 
+Exported pkcs12 follows:
+ -----BEGIN PKCS12-----
+ MIIKpwIBAzCCCmEGCSqGSIb3DQEHAaCCClIEggpOMIIKSjCCCkYGCSqGSIb3DQEH
+ BqCCCjcwggozAgEAMIIKLAYJKoZIhvcNAQcBMBsGCiqGSIb3DQEMAQMwDQQInrWa
+ iOlgrnkCAQGAggoAvoSVsNKsM17vIjVKMNdRu3v2It8GwN/F8ZUffRjVQyB+zX5M
+ 2SUZEx8bpQIOC8uG0J0KBDIUbHLXdPaeP7kgr0oWWN9Y/rCEkghdIPVwXLM3CFSG
+ 7JrRJJTUST0WmXQtUhG1p3xWY0n3W2vJRkyf76nlSet8/PaRJggneSWdXFfdhPtk
+ /GvMcJAWJVf2Ce6mL0r24qyqYDlTOKFxHIEXE1eh3kpD9BoqhSRZ3hew752PD5cb
+ kVsE0JaWkbUcvDXm8lKjBlK/Ycc9t95ioCYf6erFZO0njRK4D/7jGm/VupPe0RZS
+ Kvwh9XaGmQ2l/8Itz/qav6BgWLNmI1iUU6eayPJ6GJTSJOeuC3swtUjnNcGBcrAZ
+ GVKzPOgmGbJ0X2I0+ugKlW2AgwjLxL8t21eMWzO8Vdu4Cb+EAEU4PBUTasm2wAo1
+ hPUxfW90rEmbMDFGtotQjgbZorfU3Wy8BOTiwWjR/prKalSsAHAzHRq1W+DaaXbH
+ M0XzgMuQLfHXVKXk4EcbTPwsEMi7UOmHMBEUdX/UeK6u+5JI5J2C7HWT1aiPAy/F
+ uP1LvVTdhwi0EzJYHqTHmCb36+c3/Ps2y/UiwekvLxqLn+kJJWukHkpHwEgx/yF2
+ Vx/NwUNPsqDtoyzmMtSjpFGmL1F9XQ7IdU6PBC24OTTF/HTZkejFCFhUIbUH1BJO
+ 8YGvC/3bo2NF2bHLjqRKhY8DZIIYV1rhKKjo0yKZKuNDyd84qIopEqKdli+ThKzT
+ 
+ -----END PKCS12-----
+</code></pre><h3 id="palo-alto-firewall-using-webgui-2">Palo Alto Firewall using WebGUI</h3>
+<p>To export certificate in PKCS12 format navigate to <code>Device &gt; Certificate Management &gt; Certificates</code> menu, select identity certificate you want to backup and press Export Certificate button on the bottom menu. Type-in passphrase and press OK. The file with .p12 extension will be downloaded by the web browser.</p>
+<img src="image-43.png" alt="" class="img-fluid py-4"><p>Note, that in contrast to ASA, you can export Base-64 encoded PEM certificate with encrypted private key.</p>
+<img src="image-44.png" alt="" class="img-fluid py-4"><p>The resulting file looks like shown in the screenshot below.</p>
+<img src="image-45.png" alt="" class="img-fluid py-4"><h3 id="palo-alto-firewall-using-cli-2">Palo Alto Firewall using CLI</h3>
+<p>Doesn’t seem to be possible as of 8.1.0.</p>
+<h2 id="certificate-operations">Certificate Operations</h2>
+<p>Once the certificates are exported in PKCS#12 format, they can be imported on the same device or on another device.</p>
+<p>Below are couple of examples how certificate is applied to different services.</p>
+<p>Activating certificate for SSL VPN on ASA is done by navigating to <code>Configuration &gt; Remote Access VPN &gt; Network (Client) Access &gt; Any Connect Connection Profiles</code>. Press Device Certificate button and select the identity certificate as shown in the screenshot below.</p>
+<img src="image-46.png" alt="" class="img-fluid py-4"><p>To use certificate for management interface on Palo Alto, navigate to <code>Device &gt; Setup</code>. Click on Security Communication Settings, as shown in the screenshot below and select certificate.</p>
+<img src="image-47.png" alt="" class="img-fluid py-4">
+
+                
+                <div class="mt-9">
+                    
+                    
+                    <nav class="inline-grid grid-cols-4 space-x-2.5 w-full justify-center pt-5">
+
+                        
+                        <a class="text-center col-start-2  py-2 px-3 rounded font-medium select-none border text-gray-900  bg-white transition-colors hover:border-gray-400 hover:bg-gray-700 hover:text-white "
+                            href="/site-to-site-vpns-on-palo-alto-network-firewalls/">
+                            &lt; Prev
+                        </a>
+                        
+
+                        
+                        <a class="text-center col-start-3 py-2 px-3 rounded font-medium select-none border text-gray-900  bg-white dtransition-colors hover:border-gray-400 hover:bg-gray-700 hover:text-white "
+                            href="/cisco-zone-based-firewall-configuration-step-by-step-part-1/">
+                            Next > </a>
+                        
+                    </nav>
+
+                </div>
+                
+
+
+
+        </div>
+        
+        <div class="mt-6 ml-6">
+
+                <h2 class="mb-5">Categories:</h2>
+                <ul class="text-cyan-500">
+                    
+                        <li class="mb-1"><a href="/category/cisco/">Cisco</a></li>
+                    
+                        <li class="mb-1"><a href="/category/cisco-asa/">Cisco ASA</a></li>
+                    
+                        <li class="mb-1"><a href="/category/palo-alto/">Palo Alto</a></li>
+                    
+                        <li class="mb-1"><a href="/category/pki/">PKI</a></li>
+                    
+                </ul>
+                <br>
+
+                
+                <br>
+                
+                <h2 class="mb-5">Recent posts:</h2>
+                <ul class="text-cyan-500">
+                    
+                        <li><a class="mb-1" href="/cisco-firewall-models-and-performance/">Cisco Firewall Models and Performance</a></li>
+                    
+                        <li><a class="mb-1" href="/cisco-zone-based-firewall-configuration-step-by-step-part-2/">Cisco Zone Based Firewall Configuration Step By Step Part 2</a></li>
+                    
+                        <li><a class="mb-1" href="/cisco-zone-based-firewall-configuration-step-by-step-part-1/">Cisco Zone Based Firewall Configuration Step By Step Part 1</a></li>
+                    
+                        <li><a class="mb-1" href="/install-ssl-certificate-on-palo-alto-networks-or-cisco-asa-firewalls/">Install SSL certificate on Palo Alto Networks or Cisco ASA Firewalls</a></li>
+                    
+                        <li><a class="mb-1" href="/site-to-site-vpns-on-palo-alto-network-firewalls/">Site-To-Site VPNs on Palo Alto Networks Firewalls</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    </main>
+    <footer class="pt-24 text-center text-sm">
+          
+            <a href="/privacy-policy" style="text-decoration:none;" class="link-dark">Privacy Policy</a> - 
+            <a href="/terms-and-conditions" style="text-decoration:none;" class="link-dark">Terms and Conditions</a></p>
+            <p class="text-dark">Copyright &copy; 2025 threatfiltering.net</p>
+
+    </footer>
+  </div>
+</body>
+</html>
